@@ -3,7 +3,9 @@ from typing import Iterable
 
 
 def retrieve_cocktails_for_ingredients(
-    name: str, ingredients: set, is_strict: bool = False,
+    name: str,
+    ingredients: set,
+    is_strict: bool = False,
 ) -> Iterable:
     """Format and filter cocktails following given name and ingredients
 
@@ -42,13 +44,11 @@ def retrieve_cocktails_for_ingredients(
         )
 
         new_ingredient = cocktail_line["ingredient_name"]
-        known_cocktail_ingredients = merge_cocktail_infos[
-            cocktail_line["cocktail_id"]
-        ]["ingredients"]
+        known_cocktail_ingredients = merge_cocktail_infos[cocktail_line["cocktail_id"]][
+            "ingredients"
+        ]
 
-        if new_ingredient not in [
-            ingr["name"] for ingr in known_cocktail_ingredients
-        ]:
+        if new_ingredient not in [ingr["name"] for ingr in known_cocktail_ingredients]:
             known_cocktail_ingredients.append(
                 {
                     "name": new_ingredient,

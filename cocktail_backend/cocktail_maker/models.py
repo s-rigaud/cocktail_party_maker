@@ -22,6 +22,7 @@ class Tag(db.Model):
     def __repr__(self):
         return f"Tag: {self.id} - {self.tag_name}"
 
+
 class Ingredient(db.Model):
     """"""
 
@@ -30,6 +31,7 @@ class Ingredient(db.Model):
 
     def __repr__(self):
         return f"Ingredient: {self.id} - {self.ingredient_name}"
+
 
 cocktail_ingredient_quantity = db.Table(
     "cocktail_ingredient_quantity",

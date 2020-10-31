@@ -23,14 +23,16 @@ def add_ingredient(api_ingredient: dict):
     ingredient_name = api_ingredient["strIngredient1"].lower()
     ingredients = Ingredient.query.filter_by(ingredient_name=ingredient_name)
     if not ingredients.count():
-        ingredient = Ingredient(ingredient_name=ingredient_name,)
+        ingredient = Ingredient(
+            ingredient_name=ingredient_name,
+        )
         db.session.add(ingredient)
         db.session.commit()
 
 
 def add_cocktail(api_cocktail: dict):
     """Save cocktail into DB
-       Add cocktail, tags, ingredients, quantities, cocktail tags mapping
+    Add cocktail, tags, ingredients, quantities, cocktail tags mapping
     """
     cocktail_name = api_cocktail["strDrink"].lower()
     cocktails = Cocktail.query.filter_by(cocktail_name=cocktail_name)
@@ -69,7 +71,9 @@ def add_cocktail(api_cocktail: dict):
                 quantity = quantity.strip()
 
             query = cocktail_ingredient_quantity.insert().values(
-                cocktail_id=cocktail.id, ingredient_id=ingredient.id, quantity=quantity,
+                cocktail_id=cocktail.id,
+                ingredient_id=ingredient.id,
+                quantity=quantity,
             )
             db.session.execute(query)
 
@@ -86,7 +90,8 @@ def add_cocktail(api_cocktail: dict):
                 db.session.commit()  # commit for id
 
             query = cocktail_tags.insert().values(
-                cocktail_id=cocktail.id, tag_id=tag.id,
+                cocktail_id=cocktail.id,
+                tag_id=tag.id,
             )
             db.session.execute(query)
 
