@@ -58,6 +58,7 @@ export const CocktailBrewer = () => {
    const url = "/ingredients?name="+name
    const response = await fetch(url)
    const ingredient_json = await response.json()
+   console.log(ingredient_json)
    return ingredient_json.ingredients
  }
 
@@ -119,7 +120,7 @@ export const CocktailBrewer = () => {
       <Card.Content>
       <Card.Header>{capitalize(cocktailDescription.name)}</Card.Header>
       <Card.Meta>
-          <span className='date'>Added the XXX</span>
+          <span className='date'>Added the {cocktailDescription.creation_date}</span>
       </Card.Meta>
       <Card.Description>
         <List>
@@ -138,7 +139,7 @@ export const CocktailBrewer = () => {
       </Card.Content>
       <Card.Content extra>
           <Icon name='user' />
-          Already made XXX times
+          Already made {cocktailDescription.usage} times
       </Card.Content>
       </Card>
     )

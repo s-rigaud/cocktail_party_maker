@@ -7,6 +7,7 @@ from cocktail_maker.models import (
     Tag,
     cocktail_ingredient_quantity,
     cocktail_tags,
+    add_full_cocktail,
 )
 import json
 
@@ -16,86 +17,7 @@ http = Http()
 ### Sources :
 # https://www.thecocktaildb.com/api.php
 # https://github.com/alfg/opendrinks/blob/master/src/recipes/el-presidente.json
-
-
-def add_ingredient(api_ingredient: dict):
-    """Add ingredient to DB if it doesn't already exist"""
-    ingredient_name = api_ingredient["strIngredient1"].lower()
-    ingredients = Ingredient.query.filter_by(ingredient_name=ingredient_name)
-    if not ingredients.count():
-        ingredient = Ingredient(
-            ingredient_name=ingredient_name,
-        )
-        db.session.add(ingredient)
-        db.session.commit()
-
-
-def add_cocktail(api_cocktail: dict):
-    """Save cocktail into DB
-    Add cocktail, tags, ingredients, quantities, cocktail tags mapping
-    """
-    cocktail_name = api_cocktail["strDrink"].lower()
-    cocktails = Cocktail.query.filter_by(cocktail_name=cocktail_name)
-    if cocktails.count():
-        print(f"{cocktail_name} already exists")
-        return
-
-    cocktail = Cocktail(
-        cocktail_name=cocktail_name,
-        cocktail_image=api_cocktail["strDrinkThumb"],
-        cocktail_instructions=api_cocktail["strInstructions"],
-    )
-    db.session.add(cocktail)
-    db.session.commit()  # commit for id
-
-    for index in range(1, 16):
-        ingredient_attr = f"strIngredient{index}"
-        ingredient_name = api_cocktail[ingredient_attr]
-
-        if ingredient_name:
-            ingredient_name = ingredient_name.lower()
-            ingredients = Ingredient.query.filter_by(ingredient_name=ingredient_name)
-
-            if ingredients.count():
-                ingredient = ingredients[0]
-            else:
-                # All ingredients already exists normally
-                print(f"Added the new ingredient {ingredient_name}")
-
-                ingredient = Ingredient(ingredient_name=ingredient_name)
-                db.session.add(ingredient)
-            db.session.commit()  # commit for id
-
-            quantity = api_cocktail[f"strMeasure{index}"]
-            if quantity:
-                quantity = quantity.strip()
-
-            query = cocktail_ingredient_quantity.insert().values(
-                cocktail_id=cocktail.id,
-                ingredient_id=ingredient.id,
-                quantity=quantity,
-            )
-            db.session.execute(query)
-
-    tags = api_cocktail["strTags"]
-    if tags:
-        for tag_name in tags.split(","):
-            tag_name = tag_name.lower()
-            tag = Tag.query.filter_by(tag_name=tag_name)
-            if tag.count():
-                tag = tag[0]
-            else:
-                tag = Tag(tag_name=tag_name)
-                db.session.add(tag)
-                db.session.commit()  # commit for id
-
-            query = cocktail_tags.insert().values(
-                cocktail_id=cocktail.id,
-                tag_id=tag.id,
-            )
-            db.session.execute(query)
-
-    db.session.commit()  # Ensure sessio $n commited
+# Books
 
 
 def download_cocktail(id_: int = 102):
@@ -124,7 +46,27 @@ def collect_cocktails():
             api_cocktail = download_cocktail(i)
             if api_cocktail:
                 print(f"Cocktail found for id {i}")
-                add_cocktail(api_cocktail)
+                ingredients_and_quantities = []
+                for index in range(1, 16):
+                    ingredient_attr = f"strIngredient{index}"
+                    ingredient_name = api_cocktail[ingredient_attr]
+                    ingredient_quantity = api_cocktail[f"strMeasure{index}"]
+                    if ingredient_name:
+                        ingredients_and_quantities.append(
+                            (ingredient_name, ingredient_quantity)
+                        )
+
+                tags = []
+                if "," in api_cocktail["strTags"]:
+                    tags += api_cocktail["strTags"].split(",")
+
+                add_full_cocktail(
+                    name=api_cocktail["strDrink"],
+                    image=api_cocktail["strDrinkThumb"],
+                    instructions=api_cocktail["strInstructions"],
+                    ingredients=ingredients_and_quantities,
+                    tags=tags,
+                )
             else:
                 print(f"No cocktail found for id {i}")
 
@@ -132,8 +74,5 @@ def collect_cocktails():
 def collect_ingredients():
     """Download cocktail and insert them into DB"""
     with app.app_context():
-        # Current API range is from 11,000 to 19,000
-        api_ingredients = download_ingredients()
-        for ingredient in api_ingredients:
-            add_ingredient(ingredient)
-        print(api_ingredients)
+        pass
+        # collect_cocktails()

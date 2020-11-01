@@ -69,7 +69,9 @@ export const CocktailMakerForm = () => {
 
         let cocktail = {
             "name": name,
-            "ingredients": mergeIngrAndQuantities()
+            "ingredients": mergeIngrAndQuantities(),
+            "image": "https://i.pinimg.com/originals/7b/20/cb/7b20cb24e5093df0dbcea8f3f49eeddd.jpg",
+            "instructions": "Mix everything !",
         }
 
         const response = await fetch("cocktails/add", {
@@ -111,7 +113,7 @@ export const CocktailMakerForm = () => {
                 icon='cocktail'
                 header='Success ✔️'
                 list={formatIngredientsToDisplay()}
-                content={'📝 Recipe of the ' + responseMessage["name"] + " learnt."}
+                content={'📝 Recipe of ' + responseMessage["name"] + " learnt."}
                 visible={success}
             />
             <Message

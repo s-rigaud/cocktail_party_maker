@@ -8,8 +8,13 @@ import json
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from cocktail_maker import app, db
-from cocktail_maker.utils import retrieve_cocktails_for_ingredients
-from cocktail_maker.models import Cocktail, Ingredient, cocktail_ingredient_quantity
+from cocktail_maker.utils import retrieve_cocktails_from_ingredients, validate_quantity
+from cocktail_maker.models import (
+    Cocktail,
+    Ingredient,
+    cocktail_ingredient_quantity,
+    add_full_cocktail,
+)
 
 
 @app.route("/cocktails/add", methods=["POST"])
@@ -27,64 +32,25 @@ def add_cocktail():
     }
     """
     cocktail_data = request.get_json()
-    if (
-        cocktail_data
-        and cocktail_data.get("name")
-        and cocktail_data.get("ingredients")
-        and len(cocktail_data["ingredients"]) >= 2
-        # Has at least two different ingredients
-        and len(set([ingr for ingr, _ in cocktail_data["ingredients"] if ingr])) >= 2
-    ):
-        cocktail_name = cocktail_data["name"].lower()
-
-        cocktails = Cocktail.query.all()
-        db_cocktail_names = [c.cocktail_name for c in cocktails]
-        if cocktail_name not in db_cocktail_names:
-            new_cocktail = Cocktail(
-                cocktail_name=cocktail_name,
-                cocktail_image="Not provided",
-                cocktail_instructions="Mix!",
-            )
-            db.session.add(new_cocktail)
-            db.session.commit()
-
-            added_ingredients = []
-            for ingredient_name, quantity in cocktail_data["ingredients"]:
-                if ingredient_name and quantity:
-                    ingredient_name = ingredient_name.lower()
-                    ingredients = Ingredient.query.filter_by(
-                        ingredient_name=ingredient_name
-                    )
-                    if ingredients.count():
-                        ingredient = ingredients[0]
-                    else:
-                        ingredient = Ingredient(ingredient_name=ingredient_name)
-                        db.session.add(ingredient)
-                        db.session.commit() # Getting id
-                        print(f"Added the new ingredient {ingredient_name}")
-
-                    query = cocktail_ingredient_quantity.insert().values(
-                        cocktail_id=new_cocktail.id,
-                        ingredient_id=ingredient.id,
-                        quantity=quantity,
-                    )
-                    db.session.execute(query)
-                    added_ingredients.append([ingredient.ingredient_name, quantity])
-
-            return json.dumps(
-                {
-                    "name": cocktail_name,
-                    "ingredients": added_ingredients
-                }
-            ), 200
-
-        else:
-            return json.dumps("Cocktail name already used!"), 418
-
-    return (
-        json.dumps("You should provide a name and at least 2 different ingredients to create a cocktail!"),
-        400,
+    success, message = add_full_cocktail(
+        name=cocktail_data.get("name", ""),
+        image=cocktail_data.get("image", ""),
+        instructions=cocktail_data.get("instructions", ""),
+        ingredients=cocktail_data.get("ingredients", []),
+        tags=cocktail_data.get("tags", []),
     )
+    if not success:
+        return json.dumps(message), 418
+    else:
+        return (
+            json.dumps(
+                {
+                    "name": cocktail_data.get("name", ""),
+                    "ingredients": cocktail_data.get("ingredients", []),
+                }
+            ),
+            200,
+        )
 
 
 @app.route("/cocktails/exact")
@@ -99,7 +65,12 @@ def exact_cocktail():
         ingredients.add(ingredient)
     ingredients.discard("")
 
-    cocktails = retrieve_cocktails_for_ingredients(None, ingredients, True)
+    # Results is list of one or zero element as is_strict is set
+    cocktails = retrieve_cocktails_from_ingredients(
+        name="",
+        ingredients=ingredients,
+        is_strict=True,
+    )
 
     return jsonify({"cocktails": cocktails})
 
@@ -130,7 +101,7 @@ def ingredients_filter():
 def ingredient_complement():
     """When searching from valid new ingredients to add
     the function return the list which take part in the
-    composition of a cocktail which can be made from
+    composition of a cocktail which can be made with
     provided ones
     """
     filters = {k: v for k, v in request.args.items()}
@@ -141,7 +112,11 @@ def ingredient_complement():
         ingredients.add(ingredient)
     ingredients.discard("")
 
-    cocktails = retrieve_cocktails_for_ingredients(None, ingredients)
+    cocktails = retrieve_cocktails_from_ingredients(
+        name="",
+        ingredients=ingredients,
+        is_strict=False,
+    )
     complement_ingredients = set()
     for cocktail in cocktails:
         complement_ingredients.update(
