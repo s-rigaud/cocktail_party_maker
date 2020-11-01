@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 
-import { Button, Divider, Dropdown, Form, Popup, Message } from 'semantic-ui-react'
+import { Button, Divider, Form, Popup, Message } from 'semantic-ui-react'
 
 export const CocktailMakerForm = () => {
 
@@ -80,7 +80,6 @@ export const CocktailMakerForm = () => {
           body: JSON.stringify(cocktail)
         })
 
-        console.log(response)
         setResponseMessage(await response.json())
         if (response.ok) {
             setSuccess(true)
