@@ -1,5 +1,8 @@
 import React, {useEffect, useState} from 'react'
 
+import { Card, Icon, Image } from 'semantic-ui-react'
+
+
 export const CocktailBrewer = () => {
 
   // TODO
@@ -11,7 +14,7 @@ export const CocktailBrewer = () => {
  const [ingredient, setIngredient] = useState("")
  const [commonIngredients, setCommonIngredients] = useState([])
  const [selectedIngredients, setSelectedIngredients] = useState([])
- const [cocktail, setCocktail] = useState([])
+ const [cocktailDescription, setCocktailDescription] = useState([])
 
  useEffect(() => {
    populateCommonIngredients()
@@ -59,7 +62,7 @@ export const CocktailBrewer = () => {
    return ingredient_json.ingredients
  }
 
- const getExactCocktailNameByIngredients = async(newlyMovedIngr, mode) => {
+ const getExactCocktailByIngredients = async(newlyMovedIngr, mode) => {
    // As setCommonIngredients asn't updated the list yet we have to
    // pass the new selected ingredients as parameter
 
@@ -75,7 +78,7 @@ export const CocktailBrewer = () => {
    const ingredient_json = await response.json()
    console.log(ingredient_json.cocktails)
    if (ingredient_json.cocktails.length === 1){
-     return ingredient_json.cocktails[0].name
+     return ingredient_json.cocktails[0]
    }
    return ""
  }
@@ -92,7 +95,8 @@ export const CocktailBrewer = () => {
    setSelectedIngredients(currIngr => [...currIngr, name])
    setCommonIngredients(await getAdditionalIngredients(name, "select"))
 
-   setCocktail(await getExactCocktailNameByIngredients(name, "select"))
+   let cocktailResponse = await getExactCocktailByIngredients(name, "select")
+   setCocktailDescription(formatCocktailResponse(cocktailResponse))
  }
 
  const unselectIngredient = async (event) => {
@@ -104,7 +108,13 @@ export const CocktailBrewer = () => {
      ingr => ingr !== name
    ))
 
-   setCocktail(await getExactCocktailNameByIngredients(name, "unselect"))
+   let cocktailResponse = await getExactCocktailByIngredients(name, "unselect")
+   setCocktailDescription(formatCocktailResponse(cocktailResponse))
+ }
+
+ const formatCocktailResponse = (cocktailResponse) => {
+   return cocktailResponse.name
+
  }
 
  return (
@@ -157,7 +167,26 @@ export const CocktailBrewer = () => {
      <div style={{ backgroundColor: "#7ed6df" }}>
        <h1>Cocktail</h1>
        <div id="cocktail">
-         <p>{capitalize(cocktail)}</p>
+         <Card centered>
+          <Image src='http://shake-that.com/wp-content/uploads/2015/07/Vampiro.jpg' wrapped ui={false} />
+          <Card.Content>
+            <Card.Header>{capitalize(cocktailDescription)}</Card.Header>
+            <Card.Meta>
+              <span className='date'>Added the XXX</span>
+            </Card.Meta>
+            <Card.Description>
+              <ul>
+                <li>Ingr ..</li>
+                <li>Ingr ..</li>
+                <li>Ingr ..</li>
+              </ul>
+            </Card.Description>
+          </Card.Content>
+          <Card.Content extra>
+              <Icon name='user' />
+              Already made XXX times
+          </Card.Content>
+         </Card>
        </div>
      </div>
 
