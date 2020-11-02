@@ -8,7 +8,7 @@ import json
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from cocktail_maker import app, db
-from cocktail_maker.utils import retrieve_cocktails_from_ingredients, validate_quantity
+from cocktail_maker.utils import retrieve_cocktails_from_ingredients, validate_api_quantities
 from cocktail_maker.models import (
     Cocktail,
     Ingredient,
@@ -39,7 +39,7 @@ def add_cocktail():
         ingredients=cocktail_data.get("ingredients", []),
         tags=cocktail_data.get("tags", []),
     )
-    if not success:
+    if not success or not validate_api_quantities([quantity.strip() for _, quantity in ingredients]):
         return json.dumps(message), 418
     else:
         return (

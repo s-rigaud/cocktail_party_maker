@@ -28,7 +28,6 @@ export const CocktailMakerForm = () => {
 
 
     const quantityUnitOptions = [
-        { key: 'o', text: 'oz', value: 'oz' },
         { key: 'g', text: 'g', value: 'g' },
         { key: 'm', text: 'mL', value: 'mL' },
       ]

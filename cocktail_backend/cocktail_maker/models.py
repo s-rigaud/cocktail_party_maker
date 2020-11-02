@@ -75,10 +75,9 @@ def add_full_cocktail(
     """Save cocktail into DB
     Add cocktail, tags, ingredients, quantities, cocktail tags mapping
     """
-
     # Filter empty fields sended via frontend
     for ingredient in list(ingredients):
-        quantity = ingredient[1]
+        quantity = ingredient[1].strip()
         if " " in quantity and not quantity.split(" ")[0]:
             ingredients.remove(ingredient)
 
@@ -87,7 +86,6 @@ def add_full_cocktail(
         or not ingredients
         or not len(ingredients) >= 2
         or not len(set([ingr for ingr, _ in ingredients if ingr])) >= 2
-        or not validate_quantities([quantity for _, quantity in ingredients])
     ):
         return False, "Your cocktail should not already known and have at least 2 different ingredients"
 
