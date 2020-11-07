@@ -1,6 +1,16 @@
-import React from "react"
+import React, {useState} from "react"
+
+import { Button } from 'semantic-ui-react'
 
 export const Header = () => {
+
+  const [loading, setLoading] = useState(false)
+
+  const callLoadCocktailDB = async() => {
+    setLoading(true)
+    await fetch("cocktail/cocktaildb")
+    setLoading(false)
+  }
 
     return (
       <header>
@@ -10,6 +20,13 @@ export const Header = () => {
                     🍹 Cocktail Party Maker
                   </strong>
               </div>
+              <Button
+                disabled={loading}
+                loading={loading}
+                onClick={callLoadCocktailDB}
+            >
+                Load Cocktail DB
+            </Button>
           </div>
       </header>
   )

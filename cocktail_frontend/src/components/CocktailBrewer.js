@@ -41,21 +41,29 @@ export const CocktailBrewer = () => {
    // As setCommonIngredients asn't updated the list yet we have to
    // pass the new selected ingredients as parameter
 
-   // Concat to work with a copy of prop value
+   // Slice to work with a copy of prop value
    let updatedSelectedItems = selectedIngredients.slice()
    if (mode === "select") {
      updatedSelectedItems.push(newlyMovedIngr)
    }else{
      updatedSelectedItems = updatedSelectedItems.filter(item => item !== newlyMovedIngr)
    }
-   const url = "/ingredients/add?ingredients=" + JSON.stringify(updatedSelectedItems)
+
+   let url = "/ingredients/suggestion"
+   if (updatedSelectedItems.length > 0) {
+     url += "?ingredients=" + JSON.stringify(updatedSelectedItems)
+   }
+
    const response = await fetch(url)
    const ingredient_json = await response.json()
    return ingredient_json.ingredients
  }
 
  const getApiIngredientsByName = async(name) => {
-   const url = "/ingredients?name="+name
+   let url = "/ingredients"
+   if(name){
+     url += "?name=" + name
+   }
    const response = await fetch(url)
    const ingredient_json = await response.json()
    console.log(ingredient_json)
@@ -73,13 +81,11 @@ export const CocktailBrewer = () => {
    }else{
      updatedSelectedItems = updatedSelectedItems.filter(item => item !== newlyMovedIngr)
    }
-   const url = "/cocktails/exact?ingredients=" + JSON.stringify(updatedSelectedItems)
+   const url = "/cocktail/exact?ingredients=" + JSON.stringify(updatedSelectedItems)
    const response = await fetch(url)
    const ingredient_json = await response.json()
-   if (ingredient_json.cocktails.length === 1){
-     return ingredient_json.cocktails[0]
-   }
-   return {}
+   console.log(ingredient_json.cocktail)
+   return ingredient_json.cocktail
  }
 
  const populateCommonIngredients = async() => {

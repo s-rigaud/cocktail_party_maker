@@ -73,15 +73,17 @@ export const CocktailMakerForm = () => {
             "instructions": "Mix everything !",
         }
 
-        const response = await fetch("cocktails/add", {
+        const response = await fetch("cocktail/add", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify(cocktail)
         })
-
-        setResponseMessage(await response.json())
+        console.log(response)
+        let responseContent = await response.json()
+        console.log(responseContent.message)
+        setResponseMessage(responseContent.message)
         if (response.ok) {
             setSuccess(true)
             clearFormFields()
