@@ -81,7 +81,10 @@ export const CocktailBrewer = () => {
    }else{
      updatedSelectedItems = updatedSelectedItems.filter(item => item !== newlyMovedIngr)
    }
-   const url = "/cocktail/exact?ingredients=" + JSON.stringify(updatedSelectedItems)
+   let url = "/cocktail/exact"
+   if (updatedSelectedItems.length > 0) {
+    url += "?ingredients=" + JSON.stringify(updatedSelectedItems)
+   }
    const response = await fetch(url)
    const ingredient_json = await response.json()
    console.log(ingredient_json.cocktail)
@@ -200,7 +203,7 @@ export const CocktailBrewer = () => {
 
        <Header block as='h1'>Cocktails</Header>
        <div id="cocktail">
-         <CocktailCard coctailDescription={cocktailDescription}/>
+         <CocktailCard coctailDescription={cocktailDescription} /* PROPS */ />
        </div>
      </div>
 

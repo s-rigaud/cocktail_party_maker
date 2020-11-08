@@ -2,7 +2,7 @@ import json
 
 from httplib2 import Http
 
-from .utils import transform_quantity_cdb, add_full_cocktail
+from .utils import add_full_cocktail, transform_quantity_cdb
 
 USER_AGENTS = "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Mobile Safari/537.36"
 http = Http()

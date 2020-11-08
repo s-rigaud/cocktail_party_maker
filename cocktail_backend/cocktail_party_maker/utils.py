@@ -1,5 +1,7 @@
 from typing import Iterable, List, Tuple
 
+from django.contrib import auth
+
 from .models import Cocktail, CocktailTag, Ingredient, Quantity, Tag
 
 
@@ -9,6 +11,7 @@ def add_full_cocktail(
     instructions: str,
     ingredients: List[Tuple[str, str]],
     tags: list,
+    creator=None,
 ) -> Tuple[bool, str]:
     """Save cocktail into DB
     Add cocktail, tags, ingredients, quantities, cocktail tags mapping
@@ -41,8 +44,9 @@ def add_full_cocktail(
 
     cocktail = Cocktail(
         name=cocktail_name,
-        picture=picture,
+        picture=picture or "https://image.freepik.com/free-vector/empty-glass-transparent-whiskey-glass-glassware_83194-879.jpg",
         instructions=instructions,
+        creator=creator,
     )
     cocktail.save()  # To retrieve ID
 

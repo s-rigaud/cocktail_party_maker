@@ -1,15 +1,17 @@
 import json
 
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+from .data_gatherer import collect_cocktails_cdb
 from .models import Cocktail, Ingredient, Quantity
 from .utils import add_full_cocktail
-from .data_gatherer import collect_cocktails_cdb
 from .views import *
 
 
 @csrf_exempt
+@login_required
 def add_cocktail(request):
     """Add cocktail into DB
 
@@ -24,12 +26,14 @@ def add_cocktail(request):
     }
     """
     cocktail_data = json.loads(request.body.decode())
+    import ipdb; ipdb.set_trace()
     success, message = add_full_cocktail(
         name=cocktail_data.get("name", ""),
         picture=cocktail_data.get("picture", ""),
         instructions=cocktail_data.get("instructions", ""),
         ingredients=cocktail_data.get("ingredients", []),
         tags=cocktail_data.get("tags", []),
+        creator=request.user,
     )
     if not success:
         return JsonResponse(
@@ -61,8 +65,8 @@ def get_exact_cocktail(request):
     # cocktails = transform_cocktails(cocktail_list)
     cocktails = Cocktail.objects.filter(
         state="AC",
-        quantity__ingredient__name__in = ingredient_filter,
-    )# and to add .filter(author = log_user and Pending)
+        quantity__ingredient__name__in=ingredient_filter,
+    )  # and to add .filter(author = log_user and Pending)
 
     cocktail_response = {}
     for cocktail in cocktails:
@@ -88,7 +92,7 @@ def get_exact_cocktail(request):
             cocktail.usage += 1
             cocktail.save()
 
-            break # Only the first one is required
+            break  # Only the first one is required
 
     return JsonResponse({"cocktail": cocktail_response})
 
@@ -140,7 +144,7 @@ def ingredient_suggestion(request):
 
     return JsonResponse({"ingredients": list(ingredients)})
 
+
 def load_cocktail_db_info(request):
     collect_cocktails_cdb()
     return JsonResponse({"status": "Done"})
-
