@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -26,7 +27,6 @@ def add_cocktail(request):
     }
     """
     cocktail_data = json.loads(request.body.decode())
-    import ipdb; ipdb.set_trace()
     success, message = add_full_cocktail(
         name=cocktail_data.get("name", ""),
         picture=cocktail_data.get("picture", ""),
@@ -44,7 +44,11 @@ def add_cocktail(request):
         return JsonResponse(
             {
                 "name": cocktail_data.get("name", ""),
-                "ingredients": cocktail_data.get("ingredients", []),
+                "ingredients": [
+                    (ingredient, quantity)
+                    for ingredient, quantity in cocktail_data.get("ingredients", [])
+                    if ingredient
+                ],
                 "message": message,
             }
         )
@@ -103,13 +107,11 @@ def ingredients_filter(request):
 
     filters = {}
     if params.get("name"):
-        filters["name__like"] = params["name"]
+        filters["name__icontains"] = params["name"]
 
-    ingredients = Ingredient.objects.filter(**filters).only("id", "name")
+    ingredients = Ingredient.objects.filter(**filters).only("name")
 
-    return JsonResponse(
-        {"ingredients": [ingr for ingr in ingredients.values("id", "name")]}
-    )
+    return JsonResponse({"ingredients": [ingr for ingr in ingredients.values("name")]})
 
 
 def ingredient_suggestion(request):
@@ -123,28 +125,43 @@ def ingredient_suggestion(request):
     if ingredient:
         ingredient_filter.add(ingredient)
     ingredient_filter.discard("")
+    ingredient_filter = [i.lower() for i in ingredient_filter]
 
-    filters = {}
+    # Getting the intersection of all cocktail with one of the ingredient
+    # in its composition so the result is cocktails with at least all
+    # ingredient_filter
+    cocktail_query = Cocktail.objects.filter(state="AC")
     if ingredient_filter:
-        filters["ingredient__name__in"] = ingredient_filter
+        for ingr_name in ingredient_filter:
+            new_query = Cocktail.objects.filter(quantity__ingredient__name=ingr_name)
+            cocktail_query = cocktail_query.intersection(new_query)
 
-    ## TO refacto, complex ORM request  F() might be the solution
-    # All ingredients that enter in the compostion of a cocktail
-    # with a filtered ingredient
-    quantities = Quantity.objects.filter(**filters)
-    cocktail_with_ingredients = set(q.cocktail for q in quantities)
-    ingredients = set(
-        q.ingredient.name
-        for q in Quantity.objects.filter(cocktail__in=cocktail_with_ingredients)
-    )
+    cocktail_ids = [c["id"] for c in cocktail_query.values("id")]
 
-    # Remove asked ingredients from suggested
-    for ingr in ingredient_filter:
-        ingredients.discard(ingr)
+    # Manual set to filter duplicate but keep (name, color) mapping
+    ingredients = []
+    for quantity in Quantity.objects.filter(cocktail_id__in=cocktail_ids):
+        if (
+            quantity.ingredient.name not in ingredient_filter
+            and quantity.ingredient.name not in [ingr["name"] for ingr in ingredients]
+        ):
+            ingredients.append(
+                {
+                    "name": quantity.ingredient.name,
+                    "color": quantity.ingredient.color,
+                }
+            )
 
-    return JsonResponse({"ingredients": list(ingredients)})
+    # While frontend can't access dict list
+    return JsonResponse({"ingredients": [i["name"] for i in ingredients]})
 
 
+@login_required
 def load_cocktail_db_info(request):
-    collect_cocktails_cdb()
-    return JsonResponse({"status": "Done"})
+    if request.user.is_staff:
+        collect_cocktails_cdb()
+        return JsonResponse({"status": "Done"})
+    else:
+        return JsonResponse(
+            {"status": "failure", "message": "You don't have the permission to do that"}
+        )

@@ -12,4 +12,5 @@ class Profile(AbstractUser):
     def to_api_format(self):
         return {
             "login": self.username,
+            "is_staff": self.is_staff,
         }

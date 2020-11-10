@@ -82,8 +82,8 @@ export const CocktailMakerForm = () => {
         })
         console.log(response)
         let responseContent = await response.json()
-        console.log(responseContent.message)
-        setResponseMessage(responseContent.message)
+        console.log(responseContent)
+        setResponseMessage(responseContent)
         if (response.ok) {
             setSuccess(true)
             clearFormFields()
@@ -94,7 +94,7 @@ export const CocktailMakerForm = () => {
 
     const formatIngredientsToDisplay = () => {
         // [0] is ingredient name
-        // [1] is inredient quantity
+        // [1] is ingredient quantity
         let sentences = []
         if (responseMessage.hasOwnProperty("ingredients")){
             responseMessage.ingredients.map(

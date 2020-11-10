@@ -1,8 +1,9 @@
-from typing import Iterable, List, Tuple
-
-from django.contrib import auth
+from typing import List, Tuple
 
 from .models import Cocktail, CocktailTag, Ingredient, Quantity, Tag
+
+
+DEFAULT_COCKTAIL_IMAGE = "https://image.freepik.com/free-vector/empty-glass-transparent-whiskey-glass-glassware_83194-879.jpg"
 
 
 def add_full_cocktail(
@@ -44,7 +45,7 @@ def add_full_cocktail(
 
     cocktail = Cocktail(
         name=cocktail_name,
-        picture=picture or "https://image.freepik.com/free-vector/empty-glass-transparent-whiskey-glass-glassware_83194-879.jpg",
+        picture=picture or DEFAULT_COCKTAIL_IMAGE,
         instructions=instructions,
         creator=creator,
     )
@@ -92,8 +93,6 @@ def add_full_cocktail(
 ###
 # TO REFACTO or use ↓
 ####
-
-
 def validate_api_quantities(quantity: str) -> bool:
     """Validate quantity specify
 
@@ -113,10 +112,6 @@ def validate_api_quantities(quantity: str) -> bool:
         else:
             return unit in ["g", "mL"]
     return False
-
-
-def validate_quantities(quantities: list) -> bool:
-    return all([validate_quantity(q) for q in quantities])
 
 
 def transform_unit(quantity: str, unit: str, mLsU: int) -> str:

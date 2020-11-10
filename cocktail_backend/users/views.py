@@ -1,13 +1,13 @@
 import json
 
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.http import request
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
 from cocktail_party_maker.models import Cocktail
-from django.contrib.auth.decorators import login_required
 
 from .models import Profile
 
@@ -25,6 +25,13 @@ def user_login(request):
                 login(request, user)
                 return JsonResponse(data={"user": user.to_api_format()})
     return JsonResponse(data={"status": "failure"}, status=403)
+
+
+@csrf_exempt
+@login_required
+def user_logout(request):
+    logout(request)
+    return JsonResponse(data={"status": "success"}, status=200)
 
 
 @csrf_exempt
@@ -51,13 +58,16 @@ def user_leaderboard(request):
         .order_by("creator__username")
         .annotate(count=Count("creator__username"))
     )
-    return JsonResponse(data={"users": [us for us in user_stats if us["creator__username"]]})
+    return JsonResponse(
+        data={"users": [us for us in user_stats if us["creator__username"]]}
+    )
+
 
 @login_required
 def user_profile(request):
     """"""
     user = Profile.objects.filter(id=request.user.id).values("points").first()
-    user_cocktail = Cocktail.objects.filter(creator=request.user).values("creation_date", "name", "state")
-    return JsonResponse(
-        data={"user": user, "cocktails": [uc for uc in user_cocktail]}
+    user_cocktail = Cocktail.objects.filter(creator=request.user).values(
+        "creation_date", "name", "state"
     )
+    return JsonResponse(data={"user": user, "cocktails": [uc for uc in user_cocktail]})

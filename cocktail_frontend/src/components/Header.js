@@ -2,7 +2,7 @@ import React, {useState} from "react"
 
 import { Button, Icon } from 'semantic-ui-react'
 
-export const Header = ({username, setActiveIndex, getTabActiveIndex}) => {
+export const Header = ({username, setTab, isStaff}) => {
 
   const [loading, setLoading] = useState(false)
 
@@ -13,7 +13,7 @@ export const Header = ({username, setActiveIndex, getTabActiveIndex}) => {
   }
 
   const setProfileTab = () => {
-    setActiveIndex(getTabActiveIndex("Profile"))
+    setTab("Profile")
   }
 
   const LoginButton = () => {
@@ -29,21 +29,33 @@ export const Header = ({username, setActiveIndex, getTabActiveIndex}) => {
     }
     return <div></div>
   }
+
+  const CocktailDBButton = () => {
+    if (isStaff){
+      return (
+        <Button
+            disabled={loading}
+            loading={loading}
+            onClick={callLoadCocktailDB}
+        >
+            <Icon name='database' />
+            Load Cocktail DB
+        </Button>
+      )
+    }
+    return <div></div>
+  }
+
+
   return (
     <header>
         <div className="navbar navbar-dark bg-dark shadow-sm">
             <div className="container d-flex justify-content-between">
-                <h5 style={{ color: "white", margin:"5px",  font_weight: "50" }}>🍹 Cocktail Party Maker</h5>
+                <h5 style={{ color: "white", margin:"5px"}}>🍹 Cocktail Party Maker</h5>
             </div>
+            <p>a{isStaff}a</p>
             <LoginButton />
-            <Button
-              disabled={loading}
-              loading={loading}
-              onClick={callLoadCocktailDB}
-          >
-              <Icon name='database' />
-              Load Cocktail DB
-          </Button>
+            <CocktailDBButton />
         </div>
     </header>
   )

@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import './App.css'
 
-import { Tab, Label } from 'semantic-ui-react'
+import { Tab } from 'semantic-ui-react'
 
 import { Header } from './components/Header'
 import { CocktailBrewer } from './components/CocktailBrewer'
@@ -13,7 +13,12 @@ import { Leaderboard } from './components/Leaderboard'
 function App() {
 
   const [username, setUsername] = useState("")
+  const [isStaff, setIsStaff] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
+
+  const setTab = (tabName) => {
+    setActiveIndex(getTabActiveIndex(tabName))
+  }
 
   const getTabActiveIndex = (tabName) => {
     let tabNameMapping;
@@ -51,7 +56,11 @@ function App() {
             menuItem: "👤 Log in",
             render: () =>
               <Tab.Pane attached="left">
-                <ConnectionForm setUsername={setUsername}/>
+                <ConnectionForm
+                  setUsername={setUsername}
+                  setIsStaff={setIsStaff}
+                  setTab={setTab}
+                />
               </Tab.Pane>,
           },
         )
@@ -68,7 +77,11 @@ function App() {
             menuItem: "👤 Profile Page",
             render: () =>
               <Tab.Pane attached="left">
-                <ProfilePage username={username}/>
+                <ProfilePage
+                  username={username}
+                  setUsername={setUsername}
+                  setTab={setTab}
+                />
               </Tab.Pane>,
           }
         )
@@ -80,8 +93,8 @@ function App() {
     <div>
       <Header
         username={username}
-        setActiveIndex={setActiveIndex}
-        getTabActiveIndex={getTabActiveIndex}
+        setTab={setTab}
+        isStaff={isStaff}
       />
       <Tab
         menu={{

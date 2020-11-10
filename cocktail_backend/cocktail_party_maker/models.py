@@ -8,7 +8,7 @@ from users.models import Profile
 class Cocktail(models.Model):
     """"""
 
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     instructions = models.TextField()
     picture = models.TextField()
     creation_date = models.DateTimeField(default=timezone.now)
@@ -27,7 +27,7 @@ class Cocktail(models.Model):
 class Ingredient(models.Model):
     """"""
 
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     color = models.CharField(max_length=7, default="#777777")  #  hex color
 
     def __repr__(self):
@@ -45,7 +45,7 @@ class Quantity(models.Model):
 class Tag(models.Model):
     """"""
 
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
 
     def __repr__(self):
         return f"Tag: {self.id} - {self.name}"
