@@ -53,7 +53,6 @@ export const Header = ({username, setTab, isStaff}) => {
             <div className="container d-flex justify-content-between">
                 <h5 style={{ color: "white", margin:"5px"}}>🍹 Cocktail Party Maker</h5>
             </div>
-            <p>a{isStaff}a</p>
             <LoginButton />
             <CocktailDBButton />
         </div>

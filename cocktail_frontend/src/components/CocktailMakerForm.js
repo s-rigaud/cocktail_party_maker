@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 
-import { Button, Divider, Form, Popup, Message } from 'semantic-ui-react'
+import { Button, Divider, Form, Popup, Message, TextArea } from 'semantic-ui-react'
 
 export const CocktailMakerForm = () => {
 
@@ -9,6 +9,7 @@ export const CocktailMakerForm = () => {
     const [responseMessage, setResponseMessage] = useState("")
 
     const [name, setName] = useState("")
+    const [instructions, setInstructions] = useState("")
 
     const [ingr1, setIngr1] = useState("")
     const [quantity1, setQuantity1] = useState("")
@@ -70,7 +71,7 @@ export const CocktailMakerForm = () => {
             "name": name,
             "ingredients": mergeIngrAndQuantities(),
             "image": "https://i.pinimg.com/originals/7b/20/cb/7b20cb24e5093df0dbcea8f3f49eeddd.jpg",
-            "instructions": "Mix everything !",
+            "instructions": instructions,
         }
 
         const response = await fetch("cocktail/add", {
@@ -114,7 +115,7 @@ export const CocktailMakerForm = () => {
                 icon='cocktail'
                 header='Success ✔️'
                 list={formatIngredientsToDisplay()}
-                content={'📝 Recipe of ' + responseMessage["name"] + " learnt."}
+                content={'📝 Recipe of ' + responseMessage.name + " learnt."}
                 visible={success}
             />
             <Message
@@ -242,6 +243,16 @@ export const CocktailMakerForm = () => {
                     onChange={e => setQuantityUnit4(e.target.children[0].innerHTML)}
                 />
             </Form.Group>
+
+            <Divider />
+
+            <Form.Field
+                control={TextArea}
+                label='Instructions'
+                placeholder='Add Mint, Vodka and mix everything ...'
+                value={instructions}
+                onChange={e => setInstructions(e.target.value)}
+            />
 
             <Button
                 onClick={addCocktailRequest}

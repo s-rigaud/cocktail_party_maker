@@ -3,15 +3,7 @@ import React, {useEffect, useState} from 'react'
 import { Card, Icon, Image, List, Divider, Label, Header, Input, Button } from 'semantic-ui-react'
 
 export const CocktailBrewer = () => {
-
-  // TODO
-  /*  Add images
-      O -> circle ingredient display
-      Disapearing animation
-      Rework UI-UX
-  */
  const [ingredient, setIngredient] = useState("") // Search ingredient
-
 
  const [commonIngredients, setCommonIngredients] = useState([])
  const [selectedIngredients, setSelectedIngredients] = useState([])
@@ -115,7 +107,7 @@ export const CocktailBrewer = () => {
    setIngredient("")
 
    setCommonIngredients(await getAdditionalIngredients(name, "unselect"))
-   await setSelectedIngredients(currIngr => currIngr.filter(
+   setSelectedIngredients(currIngr => currIngr.filter(
      ingr => ingr !== name
    ))
 
@@ -128,7 +120,7 @@ export const CocktailBrewer = () => {
     console.log(cocktailDescription)
     return (
       <Card centered>
-      <Image src={cocktailDescription.image} wrapped ui={false} />
+      <Image src={cocktailDescription.picture} wrapped ui={false} />
       <Card.Content>
       <Card.Header>{capitalize(cocktailDescription.name)}</Card.Header>
       <Card.Meta>
@@ -136,11 +128,11 @@ export const CocktailBrewer = () => {
       </Card.Meta>
       <Card.Description>
         <List>
-          {cocktailDescription["ingredients"].map(ingredient => {
+          {cocktailDescription.ingredients.map(ingredient => {
             return (
               <List.Item>
-                <List.Header>{capitalize(ingredient.name)}</List.Header>
-                {ingredient.quantity}
+                <List.Header>{capitalize(ingredient[0])}</List.Header>
+                {ingredient[1]}
               </List.Item>
             )
           })}
@@ -180,7 +172,6 @@ export const CocktailBrewer = () => {
                id={common_ingr}
                size='tiny'
                onClick={selectIngredient}
-               icon='cocktail'
              >
                {capitalize(common_ingr)}
              </Button>
@@ -206,7 +197,7 @@ export const CocktailBrewer = () => {
 
        <Header block as='h1'>Cocktails</Header>
        <div id="cocktail">
-         <CocktailCard coctailDescription={cocktailDescription} /* PROPS */ />
+         <CocktailCard />
        </div>
      </div>
 

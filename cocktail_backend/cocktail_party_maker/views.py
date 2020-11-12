@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import ipdb
 
 from .data_gatherer import collect_cocktails_cdb
 from .models import Cocktail, Ingredient, Quantity
@@ -78,23 +79,18 @@ def get_exact_cocktail(request):
         ingredients = [(q.ingredient.name, q.quantity) for q in quantities]
 
         if ingredient_filter == set(name for name, _ in ingredients):
-            cocktail_tags = cocktail.cocktailtag_set.all().select_related("tag")
-            tags = [ct.tag.name for ct in cocktail_tags]
-
-            cocktail_response = {
-                "id": cocktail.id,
-                "name": cocktail.name,
-                "instructions": cocktail.instructions,
-                "picture": cocktail.picture,
-                "tags": tags,
-                "ingredients": ingredients,
-                "creation_date": cocktail.creation_date,
-                "usage": cocktail.usage,
-            }
-
             # Add one usage if the cocktail is made
             cocktail.usage += 1
             cocktail.save()
+
+            cocktail_tags = cocktail.cocktailtag_set.all().select_related("tag")
+            tags = [ct.tag.name for ct in cocktail_tags]
+
+            cocktail_response = cocktail.to_api_format()
+            cocktail_response.update({
+                "tags": tags,
+                "ingredients": ingredients,
+            })
 
             break  # Only the first one is required
 
@@ -109,7 +105,7 @@ def ingredients_filter(request):
     if params.get("name"):
         filters["name__icontains"] = params["name"]
 
-    ingredients = Ingredient.objects.filter(**filters).only("name")
+    ingredients = Ingredient.objects.filter(**filters).only("name").order_by("name")
 
     return JsonResponse({"ingredients": [ingr for ingr in ingredients.values("name")]})
 
@@ -154,6 +150,81 @@ def ingredient_suggestion(request):
 
     # While frontend can't access dict list
     return JsonResponse({"ingredients": [i["name"] for i in ingredients]})
+
+
+@login_required
+def get_cocktail_to_validate(request):
+    if request.user.is_staff:
+        cocktail_response = {}
+
+        cocktail = (
+            Cocktail.objects.filter(state="PD")
+            .only("id", "name", "instructions", "picture", "creation_date", "creator")
+            .select_related("creator")
+            .first()
+        )
+        if cocktail:
+            creator_name = "system"
+            if cocktail.creator:
+                creator_name = cocktail.creator.username
+            quantities = cocktail.quantity_set.all().select_related("ingredient")
+            ingredients = [(q.ingredient.name, q.quantity) for q in quantities]
+            cocktail_tags = cocktail.cocktailtag_set.all().select_related("tag")
+            tags = [ct.tag.name for ct in cocktail_tags]
+
+            cocktail_response = cocktail.to_api_format()
+            cocktail_response.update({
+                "tags": tags,
+                "ingredients": ingredients,
+                "creator": creator_name,
+            })
+
+        return JsonResponse({"cocktail": cocktail_response})
+    else:
+        return JsonResponse(
+            {"status": "failure", "message": "You don't have the permission to do that"}
+        )
+
+
+@csrf_exempt
+@login_required
+def validate_cocktail(request):
+    if request.user.is_staff:
+        # GET for POST request ??
+        cocktail_id = request.GET.get("id")
+        cocktail = (
+            Cocktail.objects.select_related("creator")
+            .only("creator", "state")
+            .get(id=cocktail_id)
+        )
+        cocktail.state = "AC"
+        cocktail.save()
+
+        creator = cocktail.creator
+        if creator:
+            creator.points += 1
+            creator.save()
+        return JsonResponse({"status": "Done"})
+    else:
+        return JsonResponse(
+            {"status": "failure", "message": "You don't have the permission to do that"}
+        )
+
+
+@csrf_exempt
+@login_required
+def refuse_cocktail(request):
+    if request.user.is_staff:
+        # GET for POST request ??
+        cocktail_id = request.GET.get("id")
+        cocktail = Cocktail.objects.only("state").get(id=cocktail_id)
+        cocktail.state = "RF"
+        cocktail.save()
+        return JsonResponse({"status": "Done"})
+    else:
+        return JsonResponse(
+            {"status": "failure", "message": "You don't have the permission to do that"}
+        )
 
 
 @login_required

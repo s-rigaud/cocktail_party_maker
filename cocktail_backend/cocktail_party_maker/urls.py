@@ -6,6 +6,11 @@ urlpatterns = [
     path("cocktail/add", views.add_cocktail, name="cocktail-add"),
     path("cocktail/exact", views.get_exact_cocktail, name="cocktail-exact"),
     path("cocktail/cocktaildb", views.load_cocktail_db_info, name="cocktaildb-load"),
+    path(
+        "cocktail/tovalidate", views.get_cocktail_to_validate, name="cocktail-validate"
+    ),
+    path("cocktail/validate", views.validate_cocktail, name="cocktail-validate"),
+    path("cocktail/refuse", views.refuse_cocktail, name="cocktail-validate"),
     path("ingredients", views.ingredients_filter, name="ingredients-get"),
     path(
         "ingredients/suggestion",

@@ -13,4 +13,5 @@ class Profile(AbstractUser):
         return {
             "login": self.username,
             "is_staff": self.is_staff,
+            "points": self.points,
         }

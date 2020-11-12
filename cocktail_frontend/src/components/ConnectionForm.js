@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 
-import { Button, Form, Message, Grid, Divider, Segment } from 'semantic-ui-react'
+import { Button, Form, Message, Divider, Segment } from 'semantic-ui-react'
 
 export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
 
@@ -68,100 +68,102 @@ export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
         setFailure(false)
     }
 
+
+
     return (
         <Segment placeholder>
-            <Grid columns={2} relaxed='very' stackable>
-                <Grid.Column>
-                    <Form>
-                        <Form.Input
-                            icon='user'
-                            iconPosition='left'
-                            label='Username'
-                            placeholder='Username'
-                            value={login}
-                            onChange={(e) => {
-                                setLogin(e.target.value)
-                                resetRequestStatus()
-                            }}
-                        />
-                        <Form.Input
-                            icon='lock'
-                            iconPosition='left'
-                            label='Password'
-                            type='password'
-                            placeholder='*****'
-                            value={password}
-                            onChange={(e) => {
-                                setPassword(e.target.value)
-                                resetRequestStatus()
-                            }}
-                        />
+            <Form>
+                <Form.Input
+                    autoFocus
+                    id="username"
+                    name="_username"
 
-                        <Button content='Login' primary onClick={loginRequest}/>
-                    </Form>
-                </Grid.Column>
+                    icon='user'
+                    iconPosition='left'
+                    label='Username'
+                    placeholder='Username'
+                    value={login}
+                    onChange={(e) => {
+                        setLogin(e.target.value)
+                        resetRequestStatus()
+                    }}
+                />
+                <Form.Input
+                    id="password"
+                    name="_password"
 
-                <Grid.Column verticalAlign='middle'>
-                    <Form>
-                        <Message
-                            success
-                            icon='cocktail'
-                            header='Success ✔️'
-                            content={'Logged'}
-                            visible={success}
-                        />
-                        <Message
-                            error
-                            icon='times'
-                            header='Error'
-                            content={"Not logged"}
-                            visible={failure}
-                        />
+                    icon='lock'
+                    iconPosition='left'
+                    label='Password'
+                    type='password'
+                    placeholder='*****'
+                    value={password}
+                    onChange={(e) => {
+                        setPassword(e.target.value)
+                        resetRequestStatus()
+                    }}
+                />
 
-                        <Form.Input
-                            icon='user'
-                            iconPosition='left'
-                            label='Username'
-                            placeholder='Username'
-                            value={login}
-                            onChange={(e) => {
-                                setLogin(e.target.value)
-                                resetRequestStatus()
-                            }}
-                        />
-                        <Form.Input
-                            icon='user'
-                            iconPosition='left'
-                            label='Mail'
-                            placeholder='bernard123@gmail.com'
-                            value={"mail"}
-                        />
-                        <Form.Input
-                            icon='lock'
-                            iconPosition='left'
-                            label='Password'
-                            type='password'
-                            placeholder='*****'
-                            value={password}
-                            onChange={(e) => {
-                                setPassword(e.target.value)
-                                resetRequestStatus()
-                            }}
-                        />
-                        <Form.Input
-                            icon='lock'
-                            iconPosition='left'
-                            label='Confirm password'
-                            type='password'
-                            placeholder='*****'
-                        />
+                <Button content='Login' primary onClick={loginRequest}/>
+            </Form>
+            <Divider />
 
-                        <Button content='Sign up' icon='signup' primary onClick={registerRequest}/>
-                    </Form>
-                </Grid.Column>
-            </Grid>
+            <Form>
+                <Message
+                    success
+                    icon='cocktail'
+                    header='Success ✔️'
+                    content={'Logged'}
+                    visible={success}
+                />
+                <Message
+                    error
+                    icon='times'
+                    header='Error'
+                    content={"Not logged"}
+                    visible={failure}
+                />
 
-            <Divider vertical>Or</Divider>
+                <Form.Input
+                    icon='user'
+                    iconPosition='left'
+                    label='Username'
+                    placeholder='Username'
+                    value={login}
+                    onChange={(e) => {
+                        setLogin(e.target.value)
+                        resetRequestStatus()
+                    }}
+                />
+                <Form.Input
+                    icon='user'
+                    iconPosition='left'
+                    label='Mail'
+                    placeholder='bernard123@gmail.com'
+                    value={"mail"}
+                />
+                <Form.Input
+                    icon='lock'
+                    iconPosition='left'
+                    label='Password'
+                    type='password'
+                    placeholder='*****'
+                    value={password}
+                    onChange={(e) => {
+                        setPassword(e.target.value)
+                        resetRequestStatus()
+                    }}
+                />
+                <Form.Input
+                    icon='lock'
+                    iconPosition='left'
+                    label='Confirm password'
+                    type='password'
+                    placeholder='*****'
+                />
+
+                <Button content='Sign up' icon='signup' primary onClick={registerRequest}/>
+            </Form>
         </Segment>
   )
 }

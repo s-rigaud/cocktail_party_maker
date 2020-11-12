@@ -9,6 +9,7 @@ import { CocktailMakerForm } from './components/CocktailMakerForm'
 import { ConnectionForm } from './components/ConnectionForm'
 import { ProfilePage } from './components/ProfilePage'
 import { Leaderboard } from './components/Leaderboard'
+import { CocktailValidation } from './components/CocktailValidation'
 
 function App() {
 
@@ -26,6 +27,9 @@ function App() {
       tabNameMapping = ["Brew", "Leaderboard", "Log"]
     }else{
       tabNameMapping = ["Brew", "Leaderboard", "Add", "Profile"]
+      if (isStaff){
+        tabNameMapping.push("Administrate")
+      }
     }
     console.log("Set index to ", tabNameMapping.indexOf(tabName))
     return tabNameMapping.indexOf(tabName)
@@ -50,6 +54,7 @@ function App() {
             </Tab.Pane>,
         }
      ]
+
      if (username === ""){
         panes.push(
           {
@@ -83,8 +88,20 @@ function App() {
                   setTab={setTab}
                 />
               </Tab.Pane>,
-          }
+          },
         )
+
+        if(isStaff){
+          panes.push(
+            {
+              menuItem: "👨‍🍳 Administrate cocktails",
+              render: () =>
+                <Tab.Pane attached="left">
+                  <CocktailValidation />
+                </Tab.Pane>,
+            },
+          )
+        }
       }
     return panes
   }

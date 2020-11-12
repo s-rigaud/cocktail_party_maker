@@ -14,6 +14,7 @@ from .models import Profile
 
 @csrf_exempt
 def user_login(request):
+    """Simple session log in route"""
     logout(request)
     data = json.loads(request.body.decode())
     username = data.get("login")
@@ -30,12 +31,14 @@ def user_login(request):
 @csrf_exempt
 @login_required
 def user_logout(request):
+    """Log out route"""
     logout(request)
     return JsonResponse(data={"status": "success"}, status=200)
 
 
 @csrf_exempt
 def user_register(request):
+    """Registration route for user accounts"""
     data = json.loads(request.body.decode())
     username = data.get("login")
     password = data.get("password")
@@ -51,7 +54,7 @@ def user_register(request):
 
 
 def user_leaderboard(request):
-    """"""
+    """User leaderboard of monthly cocktail contributors"""
     user_stats = (
         Cocktail.objects.values("creator__username")
         .filter(state="AC")
@@ -65,9 +68,14 @@ def user_leaderboard(request):
 
 @login_required
 def user_profile(request):
-    """"""
-    user = Profile.objects.filter(id=request.user.id).values("points").first()
-    user_cocktail = Cocktail.objects.filter(creator=request.user).values(
+    """Display user's profile informations"""
+    user_cocktails = Cocktail.objects.filter(creator=request.user).only(
         "creation_date", "name", "state"
     )
-    return JsonResponse(data={"user": user, "cocktails": [uc for uc in user_cocktail]})
+
+    return JsonResponse(
+        data={
+            "user": request.user.to_api_format(),
+            "cocktails": [cocktail.to_api_format() for cocktail in user_cocktails],
+        }
+    )

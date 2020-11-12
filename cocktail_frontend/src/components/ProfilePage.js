@@ -58,7 +58,7 @@ export const ProfilePage = ({username, setUsername, setTab}) => {
               <Table.Row key={cocktails.indexOf(cocktail)}>
                 <Table.Cell>{cocktail.name}</Table.Cell>
                 <Table.Cell>{cocktail.creation_date}</Table.Cell>
-                <Table.Cell positive={cocktail.state === "AC"}>{cocktail.state}</Table.Cell>
+                <Table.Cell color="green">{cocktail.state}</Table.Cell>
               </Table.Row>
             )
           })}
