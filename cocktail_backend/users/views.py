@@ -6,10 +6,12 @@ from django.db.models import Count
 from django.http import request
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import ipdb
 
 from cocktail_party_maker.models import Cocktail
-
+from .utils import validate_user_register
 from .models import Profile
+
 
 
 @csrf_exempt
@@ -25,7 +27,7 @@ def user_login(request):
             if user.is_active:
                 login(request, user)
                 return JsonResponse(data={"user": user.to_api_format()})
-    return JsonResponse(data={"status": "failure"}, status=403)
+    return JsonResponse(data={"status": "failure"}, status=400)
 
 
 @csrf_exempt
@@ -41,17 +43,31 @@ def user_register(request):
     """Registration route for user accounts"""
     data = json.loads(request.body.decode())
     username = data.get("login")
+    mail = data.get("mail")
     password = data.get("password")
+    password_confirm = data.get("password_confirm")
 
-    if username and password:
-        profile = Profile.objects.create_user(
-            username=username,
-            password=password,
-        )
-        profile.save()
-        return JsonResponse(data={"status": "success"})
-    return JsonResponse(data={"status": "failure"}, status=403)
+    if validate_user_register(username, mail, password, password_confirm):
+        try:
+            profile = Profile.objects.create_user(
+                username=username,
+                password=password,
+            )
+            profile.save()
+        except Exception:
+            pass
+        else:
+            return JsonResponse(data={"status": "success"}, status=201)
 
+    return JsonResponse(data={"status": "failure"}, status=400)
+
+def get_logged_user(request):
+    """Return data about the current logged user for a session"""
+    # ugly hack to make difference between lazy loaded Profile objects
+    # and AnonimousUser objects
+    if hasattr(request.user, "to_api_format"):
+        return JsonResponse(data={"user": request.user.to_api_format()})
+    return JsonResponse(data={"user": None}, status=406)
 
 def user_leaderboard(request):
     """User leaderboard of monthly cocktail contributors"""

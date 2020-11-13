@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import './App.css'
 
 import { Tab } from 'semantic-ui-react'
@@ -16,6 +16,19 @@ function App() {
   const [username, setUsername] = useState("")
   const [isStaff, setIsStaff] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
+
+  useEffect(() => {
+    getLoggedUserRequest()
+  }, [])
+
+  const getLoggedUserRequest = async() => {
+    const response = await fetch("user/logged")
+    if (response.ok){
+      let responseContent = await response.json()
+      setUsername(responseContent.user.login)
+      setIsStaff(responseContent.user.isStaff)
+    }
+  }
 
   const setTab = (tabName) => {
     setActiveIndex(getTabActiveIndex(tabName))

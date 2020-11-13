@@ -4,7 +4,6 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-import ipdb
 
 from .data_gatherer import collect_cocktails_cdb
 from .models import Cocktail, Ingredient, Quantity
@@ -51,7 +50,8 @@ def add_cocktail(request):
                     if ingredient
                 ],
                 "message": message,
-            }
+            },
+            status=201,
         )
 
 
@@ -182,7 +182,8 @@ def get_cocktail_to_validate(request):
         return JsonResponse({"cocktail": cocktail_response})
     else:
         return JsonResponse(
-            {"status": "failure", "message": "You don't have the permission to do that"}
+            {"status": "failure", "message": "You don't have the permission to do that"},
+            status=403,
         )
 
 
@@ -207,7 +208,8 @@ def validate_cocktail(request):
         return JsonResponse({"status": "Done"})
     else:
         return JsonResponse(
-            {"status": "failure", "message": "You don't have the permission to do that"}
+            {"status": "failure", "message": "You don't have the permission to do that"},
+            status=403,
         )
 
 
@@ -223,7 +225,8 @@ def refuse_cocktail(request):
         return JsonResponse({"status": "Done"})
     else:
         return JsonResponse(
-            {"status": "failure", "message": "You don't have the permission to do that"}
+            {"status": "failure", "message": "You don't have the permission to do that"},
+            status=403,
         )
 
 
@@ -234,5 +237,6 @@ def load_cocktail_db_info(request):
         return JsonResponse({"status": "Done"})
     else:
         return JsonResponse(
-            {"status": "failure", "message": "You don't have the permission to do that"}
+            {"status": "failure", "message": "You don't have the permission to do that"},
+            status=403,
         )
