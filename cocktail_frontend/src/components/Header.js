@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useState} from 'react'
 
 import { Button, Icon } from 'semantic-ui-react'
 
@@ -8,16 +8,16 @@ export const Header = ({username, setTab, isStaff}) => {
 
   const callLoadCocktailDB = async() => {
     setLoading(true)
-    await fetch("cocktail/cocktaildb")
+    await fetch('cocktail/cocktaildb')
     setLoading(false)
   }
 
   const setProfileTab = () => {
-    setTab("Profile")
+    setTab('Profile')
   }
 
   const LoginButton = () => {
-    if (username !== ""){
+    if (username !== ''){
       return (
         <Button
           onClick={setProfileTab}
@@ -49,9 +49,9 @@ export const Header = ({username, setTab, isStaff}) => {
 
   return (
     <header>
-        <div className="navbar navbar-dark bg-dark shadow-sm">
-            <div className="container d-flex justify-content-between">
-                <h5 style={{ color: "white", margin:"5px"}}>🍹 Cocktail Party Maker</h5>
+        <div className='navbar navbar-dark bg-dark shadow-sm'>
+            <div className='container d-flex justify-content-between'>
+                <h5 style={{ color: 'white', margin:'5px'}}>🍹 Cocktail Party Maker</h5>
             </div>
             <LoginButton />
             <CocktailDBButton />

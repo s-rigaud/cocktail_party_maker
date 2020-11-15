@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react"
+import React, {useState, useEffect} from 'react'
 
 import { Table, Divider, Header, Icon } from 'semantic-ui-react'
 
@@ -11,7 +11,7 @@ export const Leaderboard = () => {
   }, [])
 
   const leaderboardRequest = async() => {
-    const response = await fetch("user/leaderboard")
+    const response = await fetch('user/leaderboard')
     let responseContent = await response.json()
     console.log(responseContent)
     setUsers(responseContent.users)
@@ -25,7 +25,7 @@ export const Leaderboard = () => {
         <Header.Content>Leaderboard</Header.Content>
       </Header>
 
-      <p>Here, you can find the user who contributes the most to the website.</p>
+      <p>Here, you can find the user who contributed the most to the website.</p>
       <p>Each time your cocktail get validated you earn a 🥇 and you make other
         people parties even better.</p>
 
@@ -49,7 +49,7 @@ export const Leaderboard = () => {
             return (
               <Table.Row key={user.creator__username}>
                 <Table.Cell>{user.creator__username}</Table.Cell>
-                <Table.Cell>{user.count +" 🥇"}</Table.Cell>
+                <Table.Cell>{user.count +' 🥇'}</Table.Cell>
               </Table.Row>
             )
           })}

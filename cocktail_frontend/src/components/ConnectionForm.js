@@ -7,28 +7,28 @@ export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
     const [success, setSuccess] = useState(false)
     const [failure, setFailure] = useState(false)
 
-    const [login, setLogin] = useState("")
-    const [mail, setMail] = useState("")
-    const [password, setPassword] = useState("")
-    const [password2, setPassword2] = useState("")
+    const [login, setLogin] = useState('')
+    const [mail, setMail] = useState('')
+    const [password, setPassword] = useState('')
+    const [password2, setPassword2] = useState('')
 
     const [isLoggingSelected, setIsLoggingSelected] = useState(true)
 
     const clearFormFields = () => {
-        setLogin("")
-        setPassword("")
+        setLogin('')
+        setPassword('')
     }
 
     const loginRequest = async() => {
         let login_infos = {
-            "login": login,
-            "password": password,
+            'login': login,
+            'password': password,
         }
 
-        const response = await fetch("user/login", {
-          method: "POST",
+        const response = await fetch('user/login', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json"
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify(login_infos)
         })
@@ -40,24 +40,24 @@ export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
         if (response.ok) {
             setUsername(responseContent.user.login)
             setIsStaff(responseContent.user.is_staff)
-            setTab("Brew")
+            setTab('Brew')
         }else{
-            setUsername("")
+            setUsername('')
         }
       }
 
     const registerRequest = async() => {
         let sign_up_infos = {
-            "login": login,
-            "mail": mail,
-            "password": password,
-            "password_confirm": password2,
+            'login': login,
+            'mail': mail,
+            'password': password,
+            'password_confirm': password2,
         }
 
-        const response = await fetch("user/register", {
-            method: "POST",
+        const response = await fetch('user/register', {
+            method: 'POST',
             headers: {
-                "Content-Type": "application/json"
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(sign_up_infos)
         })
@@ -92,8 +92,8 @@ export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
             />
             <Form.Input
                 autoFocus
-                id="username"
-                name="_username"
+                id='username'
+                name='_username'
 
                 icon='user'
                 iconPosition='left'
@@ -106,8 +106,8 @@ export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
                 }}
             />
             <Form.Input
-                id="password"
-                name="_password"
+                id='password'
+                name='_password'
 
                 icon='lock'
                 iconPosition='left'
@@ -133,7 +133,7 @@ export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
                 error
                 icon='times'
                 header='Error'
-                content={"Not logged"}
+                content={'Not logged'}
                 visible={failure}
             />
 
@@ -149,7 +149,7 @@ export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
                 }}
             />
             <Form.Input
-                icon='user'
+                icon='mail outline'
                 iconPosition='left'
                 label='Mail'
                 placeholder='bernard123@gmail.com'
@@ -190,7 +190,7 @@ export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
 
     const rootPanels = [
         { key: 'Login', title: 'Login', content: { content: LoginForm } },
-        { key: 'Register', title: 'Register', content: { content: RegisterForm } },
+        { key: 'Register', title: 'Register', content: { content: RegisterForm }, icon: 'signup' },
       ]
 
     const swapIsLogginSelected = () => setIsLoggingSelected(!isLoggingSelected)

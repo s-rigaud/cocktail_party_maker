@@ -25,8 +25,9 @@ function App() {
     const response = await fetch("user/logged")
     if (response.ok){
       let responseContent = await response.json()
+      console.log(responseContent)
       setUsername(responseContent.user.login)
-      setIsStaff(responseContent.user.isStaff)
+      setIsStaff(responseContent.user.is_staff)
     }
   }
 

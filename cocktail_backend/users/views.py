@@ -1,17 +1,15 @@
 import json
 
+from cocktail_party_maker.models import Cocktail
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.http import request
 from django.http.response import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-import ipdb
 
-from cocktail_party_maker.models import Cocktail
-from .utils import validate_user_register
 from .models import Profile
-
+from .utils import validate_user_register
 
 
 @csrf_exempt
@@ -61,6 +59,7 @@ def user_register(request):
 
     return JsonResponse(data={"status": "failure"}, status=400)
 
+
 def get_logged_user(request):
     """Return data about the current logged user for a session"""
     # ugly hack to make difference between lazy loaded Profile objects
@@ -68,6 +67,7 @@ def get_logged_user(request):
     if hasattr(request.user, "to_api_format"):
         return JsonResponse(data={"user": request.user.to_api_format()})
     return JsonResponse(data={"user": None}, status=406)
+
 
 def user_leaderboard(request):
     """User leaderboard of monthly cocktail contributors"""
@@ -85,8 +85,10 @@ def user_leaderboard(request):
 @login_required
 def user_profile(request):
     """Display user's profile informations"""
-    user_cocktails = Cocktail.objects.filter(creator=request.user).only(
-        "creation_date", "name", "state"
+    user_cocktails = (
+        Cocktail.objects.filter(creator=request.user)
+        .order_by("-creation_date")
+        .only("creation_date", "name", "state")
     )
 
     return JsonResponse(

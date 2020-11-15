@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react"
+import React, {useState, useEffect} from 'react'
 
 import { Table, Card, Button, Icon } from 'semantic-ui-react'
 
@@ -12,7 +12,7 @@ export const ProfilePage = ({username, setUsername, setTab}) => {
   }, [])
 
   const profileRequest = async() => {
-    const response = await fetch("user/profile")
+    const response = await fetch('user/profile')
     let responseContent = await response.json()
     console.log(responseContent)
     setPoints(responseContent.user.points)
@@ -22,9 +22,9 @@ export const ProfilePage = ({username, setUsername, setTab}) => {
   const logoutRequest = async() => {
     setPoints(0)
     setCocktails([])
-    setUsername("")
-    setTab("Brew")
-    await fetch("user/logout")
+    setUsername('')
+    setTab('Brew')
+    await fetch('user/logout')
   }
 
   return (
@@ -33,11 +33,11 @@ export const ProfilePage = ({username, setUsername, setTab}) => {
         centered
         image='https://images.ladbible.com/resize?type=jpeg&url=http://beta.ems.ladbiblegroup.com/s3/content/1bb3cdf35dc6d4a97a9891fef90de232.png&quality=70&width=720&aspectratio=16:9&extend=white'
         header={username}
-        extra={points + " 🥇"}
+        extra={points + ' 🥇'}
       />
       <Button
           onClick={logoutRequest}
-          color="red"
+          color='red'
       >
           <Icon name='times' />
           Log out
@@ -58,7 +58,7 @@ export const ProfilePage = ({username, setUsername, setTab}) => {
               <Table.Row key={cocktails.indexOf(cocktail)}>
                 <Table.Cell>{cocktail.name}</Table.Cell>
                 <Table.Cell>{cocktail.creation_date}</Table.Cell>
-                <Table.Cell color="green">{cocktail.state}</Table.Cell>
+                <Table.Cell color='green'>{cocktail.state}</Table.Cell>
               </Table.Row>
             )
           })}

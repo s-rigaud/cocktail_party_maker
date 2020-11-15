@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react'
 
-import { Card, Icon, Image, List, Divider, Label, Header, Input, Button } from 'semantic-ui-react'
+import { Card, Icon, Image, List, Divider, Label, Header, Input, Button, Segment } from 'semantic-ui-react'
 
 export const CocktailBrewer = () => {
- const [ingredient, setIngredient] = useState("") // Search ingredient
+ const [ingredient, setIngredient] = useState('') // Search ingredient
 
  const [commonIngredients, setCommonIngredients] = useState([])
  const [selectedIngredients, setSelectedIngredients] = useState([])
@@ -25,12 +25,18 @@ export const CocktailBrewer = () => {
  }
 
  const capitalize = (string) => {
-   if (typeof string === "string"){
+   if (typeof string === 'string'){
      return string.charAt(0).toUpperCase() + string.slice(1)
    }
    return string
  }
 
+ const getRandomCocktail = async() =>{
+  const response = await fetch('/cocktail/random')
+  const cocktail = await response.json()
+  console.log(cocktail)
+  return cocktail
+ }
  const getAdditionalIngredients = async(newlyMovedIngr, mode) => {
    // As setCommonIngredients asn't updated the list yet we have to
    // pass the new selected ingredients as parameter
@@ -38,15 +44,15 @@ export const CocktailBrewer = () => {
    // Slice to work with a copy of prop value
    console.log(selectedIngredients, newlyMovedIngr, mode)
    let updatedSelectedItems = selectedIngredients.slice()
-   if (mode === "select") {
+   if (mode === 'select') {
      updatedSelectedItems.push(newlyMovedIngr)
    }else{
      updatedSelectedItems = updatedSelectedItems.filter(item => item !== newlyMovedIngr)
    }
 
-   let url = "/ingredients/suggestion"
+   let url = '/ingredients/suggestion'
    if (updatedSelectedItems.length > 0) {
-     url += "?ingredients=" + JSON.stringify(updatedSelectedItems)
+     url += '?ingredients=' + JSON.stringify(updatedSelectedItems)
    }
 
    const response = await fetch(url)
@@ -55,9 +61,9 @@ export const CocktailBrewer = () => {
  }
 
  const getApiIngredientsByName = async(name) => {
-   let url = "/ingredients"
+   let url = '/ingredients'
    if(name){
-     url += "?name=" + name
+     url += '?name=' + name
    }
    const response = await fetch(url)
    const ingredient_json = await response.json()
@@ -71,14 +77,14 @@ export const CocktailBrewer = () => {
 
    // Concat to work with a copy of prop value
    let updatedSelectedItems = selectedIngredients.slice()
-   if (mode === "select") {
+   if (mode === 'select') {
      updatedSelectedItems.push(newlyMovedIngr)
    }else{
      updatedSelectedItems = updatedSelectedItems.filter(item => item !== newlyMovedIngr)
    }
-   let url = "/cocktail/exact"
+   let url = '/cocktail/exact'
    if (updatedSelectedItems.length > 0) {
-    url += "?ingredients=" + JSON.stringify(updatedSelectedItems)
+    url += '?ingredients=' + JSON.stringify(updatedSelectedItems)
    }
    const response = await fetch(url)
    const ingredient_json = await response.json()
@@ -87,120 +93,155 @@ export const CocktailBrewer = () => {
  }
 
  const populateCommonIngredients = async() => {
-   const ingredients = await getApiIngredientsByName("")
+   const ingredients = await getApiIngredientsByName('')
    setCommonIngredients(ingredients.map(ingr => ingr.name))
  }
 
  const selectIngredient = async(event) => {
    const name = event.target.id
-   setIngredient("")
+   setIngredient('')
 
    setSelectedIngredients(currIngr => [...currIngr, name])
-   setCommonIngredients(await getAdditionalIngredients(name, "select"))
+   setCommonIngredients(await getAdditionalIngredients(name, 'select'))
 
-   const cocktailDescription = await getExactCocktailByIngredients(name, "select")
+   const cocktailDescription = await getExactCocktailByIngredients(name, 'select')
    setCocktailDescription(cocktailDescription)
  }
 
  const unselectIngredient = async (event) => {
    const name = event.target.id
-   setIngredient("")
+   setIngredient('')
 
-   setCommonIngredients(await getAdditionalIngredients(name, "unselect"))
+   setCommonIngredients(await getAdditionalIngredients(name, 'unselect'))
    setSelectedIngredients(currIngr => currIngr.filter(
      ingr => ingr !== name
    ))
 
-   const cocktailDescription = await getExactCocktailByIngredients(name, "unselect")
+   const cocktailDescription = await getExactCocktailByIngredients(name, 'unselect')
    setCocktailDescription(cocktailDescription)
  }
 
- const CocktailCard = () => {
-  if (cocktailDescription.hasOwnProperty("name")){
-    console.log(cocktailDescription)
-    return (
-      <Card centered>
-      <Image src={cocktailDescription.picture} wrapped ui={false} />
-      <Card.Content>
-      <Card.Header>{capitalize(cocktailDescription.name)}</Card.Header>
-      <Card.Meta>
-          <span className='date'>Added the {cocktailDescription.creation_date}</span>
-      </Card.Meta>
-      <Card.Description>
-        <List>
-          {cocktailDescription.ingredients.map(ingredient => {
+ const SelectedIngredientDisplay = () => {
+    if (selectedIngredients.length){
+      return(
+        <Segment style={{ backgroundColor: '#fa983a' }}>
+          <Header block as='h1'>Selected ingredients</Header>
+          <div id='selected_ingredients'>
+          {selectedIngredients.map(selected_ingr => {
+              return (
+                <Label
+                  key={selected_ingr}
+                  id={selected_ingr}
+                  onClick={unselectIngredient}
+                >
+                  {capitalize(selected_ingr)}
+                  <Icon name='cocktail' />
+                </Label>
+              )
+            })}
+          </div>
+        </Segment>
+      )
+    }
+    return <div></div>
+ }
+
+ const IngredientSelectorDisplay = () => {
+  if (commonIngredients.length){
+    return(
+      <Segment style={{ backgroundColor: '#1e3799' }}>
+        <Header block as='h1'>All ingredients</Header>
+        <div id='all_ingredients'>
+          {commonIngredients.map(common_ingr => {
             return (
-              <List.Item>
-                <List.Header>{capitalize(ingredient[0])}</List.Header>
-                {ingredient[1]}
-              </List.Item>
+              <Button
+                key={common_ingr}
+                id={common_ingr}
+                size='tiny'
+                onClick={selectIngredient}
+              >
+                {capitalize(common_ingr)}
+              </Button>
             )
           })}
-        </List>
-        <Divider />
-        {cocktailDescription.instructions}
-      </Card.Description>
-      </Card.Content>
-      <Card.Content extra>
-          <Icon name='user' />
-          Already made {cocktailDescription.usage} times
-      </Card.Content>
-      </Card>
+        </div>
+      </Segment>
+    )
+  }
+  return <div></div>
+}
+
+ const CocktailCard = () => {
+  if (cocktailDescription.hasOwnProperty('name')){
+    console.log(cocktailDescription)
+    return (
+      <Segment style={{ backgroundColor: '#eb2f06' }}>
+        <Header block as='h1'>Cocktails</Header>
+        <Card centered>
+          <Image src={cocktailDescription.picture} wrapped ui={false} />
+          <Card.Content>
+            <Card.Header>{capitalize(cocktailDescription.name)}</Card.Header>
+            <Card.Meta>
+                <span className='date'>Added the {cocktailDescription.creation_date}</span>
+            </Card.Meta>
+            <Card.Description>
+              <List>
+                {cocktailDescription.ingredients.map(ingredient => {
+                  return (
+                    <List.Item>
+                      <List.Header>{capitalize(ingredient[0])}</List.Header>
+                      {ingredient[1]}
+                    </List.Item>
+                  )
+                })}
+              </List>
+              <Divider />
+              {cocktailDescription.instructions}
+            </Card.Description>
+          </Card.Content>
+          <Card.Content extra>
+              <Icon name='user' />
+              Already made {cocktailDescription.usage} times
+          </Card.Content>
+        </Card>
+      </Segment>
     )
   }else{
     return <div></div>
   }
 }
 
+
+
  return (
-   <div className="App">
-      <Input
-        icon='search'
-        iconPosition='left'
-        placeholder='Search for ingredient'
-        onInput={(e) => {setIngredient(e.target.value)}}
-        value={ingredient}
-      />
+   <div className='App'>
+     <Button icon='random' onClick={getRandomCocktail}></Button>
+     <Segment.Group piled>
 
-     <div style={{ backgroundColor: "#273c75" }}>
-       <Header block as='h1'>All ingredients</Header>
-       <div id="all_ingredients">
-         {commonIngredients.map(common_ingr => {
-           return (
-             <Button
-               key={common_ingr}
-               id={common_ingr}
-               size='tiny'
-               onClick={selectIngredient}
-             >
-               {capitalize(common_ingr)}
-             </Button>
-           )
-         })}
-       </div>
+        <Segment style={{ backgroundColor: '#343A40' }}>
+            <Header as='h2' icon textAlign='center'>
+              <Icon name='cocktail' circular style={{ color: 'white', backgroundColor: '#3c6382' }}/>
+              <Header.Content style={{ color: 'white' }}>Cocktail Maker</Header.Content>
+            </Header>
 
-       <Header block as='h1'>Selected ingredients</Header>
-       <div id="selected_ingredients">
-       {selectedIngredients.map(selected_ingr => {
-           return (
-            <Label
-               key={selected_ingr}
-               id={selected_ingr}
-               onClick={unselectIngredient}
-             >
-               {capitalize(selected_ingr)}
-               <Icon name='cocktail' />
-            </Label>
-           )
-         })}
-       </div>
+            <Header as='h3' icon textAlign='center' style={{ color: 'white' }}>Start making cocktail now !</Header>
 
-       <Header block as='h1'>Cocktails</Header>
-       <div id="cocktail">
-         <CocktailCard />
-       </div>
-     </div>
+            <Input
+              icon='search'
+              iconPosition='left'
+              placeholder='Search for ingredient'
+              onInput={(e) => {setIngredient(e.target.value)}}
+              value={ingredient}
+            />
+        </Segment>
 
+        <SelectedIngredientDisplay />
+
+        <IngredientSelectorDisplay />
+
+        <CocktailCard />
+
+     </Segment.Group>
    </div>
  )
 }

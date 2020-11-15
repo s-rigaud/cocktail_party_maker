@@ -1,23 +1,9 @@
 from typing import List, Tuple
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
-from .models import Cocktail, CocktailTag, Ingredient, Quantity, Tag
 
+from .models import Cocktail, CocktailTag, Ingredient, Quantity, Tag
 
 DEFAULT_COCKTAIL_IMAGE = "https://image.freepik.com/free-vector/empty-glass-transparent-whiskey-glass-glassware_83194-879.jpg"
 
-def validate_user_register(
-    username: str,
-    mail: str,
-    password: str,
-    password_confirm: str,
-):
-    try:
-        validate_email(mail)
-    except ValidationError:
-        return False
-
-    return username and password and mail and password_confirm and (password == password_confirm)
 
 def add_full_cocktail(
     name: str,

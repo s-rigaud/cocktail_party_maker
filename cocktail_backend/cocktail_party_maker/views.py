@@ -1,4 +1,5 @@
 import json
+import random
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
@@ -87,10 +88,12 @@ def get_exact_cocktail(request):
             tags = [ct.tag.name for ct in cocktail_tags]
 
             cocktail_response = cocktail.to_api_format()
-            cocktail_response.update({
-                "tags": tags,
-                "ingredients": ingredients,
-            })
+            cocktail_response.update(
+                {
+                    "tags": tags,
+                    "ingredients": ingredients,
+                }
+            )
 
             break  # Only the first one is required
 
@@ -157,12 +160,12 @@ def get_cocktail_to_validate(request):
     if request.user.is_staff:
         cocktail_response = {}
 
-        cocktail = (
+        pendaing_cocktails = (
             Cocktail.objects.filter(state="PD")
             .only("id", "name", "instructions", "picture", "creation_date", "creator")
             .select_related("creator")
-            .first()
         )
+        cocktail = pendaing_cocktails.first()
         if cocktail:
             creator_name = "system"
             if cocktail.creator:
@@ -173,16 +176,23 @@ def get_cocktail_to_validate(request):
             tags = [ct.tag.name for ct in cocktail_tags]
 
             cocktail_response = cocktail.to_api_format()
-            cocktail_response.update({
-                "tags": tags,
-                "ingredients": ingredients,
-                "creator": creator_name,
-            })
+            cocktail_response.update(
+                {
+                    "tags": tags,
+                    "ingredients": ingredients,
+                    "creator": creator_name,
+                }
+            )
 
-        return JsonResponse({"cocktail": cocktail_response})
+        return JsonResponse(
+            {"cocktail": cocktail_response, "count": pendaing_cocktails.count()}
+        )
     else:
         return JsonResponse(
-            {"status": "failure", "message": "You don't have the permission to do that"},
+            {
+                "status": "failure",
+                "message": "You don't have the permission to do that",
+            },
             status=403,
         )
 
@@ -208,7 +218,10 @@ def validate_cocktail(request):
         return JsonResponse({"status": "Done"})
     else:
         return JsonResponse(
-            {"status": "failure", "message": "You don't have the permission to do that"},
+            {
+                "status": "failure",
+                "message": "You don't have the permission to do that",
+            },
             status=403,
         )
 
@@ -225,9 +238,21 @@ def refuse_cocktail(request):
         return JsonResponse({"status": "Done"})
     else:
         return JsonResponse(
-            {"status": "failure", "message": "You don't have the permission to do that"},
+            {
+                "status": "failure",
+                "message": "You don't have the permission to do that",
+            },
             status=403,
         )
+
+
+def get_random_cocktail(request):
+    """Return a random validated cocktail"""
+    cocktails = Cocktail.objects.filter(state="AC")
+    cocktail_ids = cocktails.values_list("id").all()
+    # Ugly 0 as return of values_list is list of tuple
+    random_cocktail = cocktails.get(id=random.choices(cocktail_ids)[0][0])
+    return JsonResponse({"cocktail": random_cocktail.to_api_format()})
 
 
 @login_required
@@ -237,6 +262,9 @@ def load_cocktail_db_info(request):
         return JsonResponse({"status": "Done"})
     else:
         return JsonResponse(
-            {"status": "failure", "message": "You don't have the permission to do that"},
+            {
+                "status": "failure",
+                "message": "You don't have the permission to do that",
+            },
             status=403,
         )

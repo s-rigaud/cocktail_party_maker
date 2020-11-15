@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models.deletion import SET_NULL
 from django.utils import timezone
 
 from users.models import Profile
@@ -7,11 +6,9 @@ from users.models import Profile
 
 class Cocktail(models.Model):
     """"""
+
     STATES = (("PD", "Pending"), ("AC", "Accepted"), ("RF", "Refused"))
-    REVERSED_STATE = {
-        short: litteral
-        for short, litteral in STATES
-    }
+    REVERSED_STATE = {short: litteral for short, litteral in STATES}
 
     name = models.CharField(max_length=50, unique=True)
     instructions = models.TextField()
