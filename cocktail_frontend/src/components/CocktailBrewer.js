@@ -34,7 +34,6 @@ export const CocktailBrewer = () => {
  const getRandomCocktail = async() =>{
   const response = await fetch('/cocktail/random')
   const cocktail = await response.json()
-  console.log(cocktail)
   return cocktail
  }
  const getAdditionalIngredients = async(newlyMovedIngr, mode) => {
@@ -42,7 +41,6 @@ export const CocktailBrewer = () => {
    // pass the new selected ingredients as parameter
 
    // Slice to work with a copy of prop value
-   console.log(selectedIngredients, newlyMovedIngr, mode)
    let updatedSelectedItems = selectedIngredients.slice()
    if (mode === 'select') {
      updatedSelectedItems.push(newlyMovedIngr)
@@ -67,7 +65,6 @@ export const CocktailBrewer = () => {
    }
    const response = await fetch(url)
    const ingredient_json = await response.json()
-   console.log(ingredient_json)
    return ingredient_json.ingredients
  }
 
@@ -88,7 +85,6 @@ export const CocktailBrewer = () => {
    }
    const response = await fetch(url)
    const ingredient_json = await response.json()
-   console.log(ingredient_json.cocktail)
    return ingredient_json.cocktail
  }
 
@@ -97,8 +93,7 @@ export const CocktailBrewer = () => {
    setCommonIngredients(ingredients.map(ingr => ingr.name))
  }
 
- const selectIngredient = async(event) => {
-   const name = event.target.id
+ const selectIngredient = async(name) => {
    setIngredient('')
 
    setSelectedIngredients(currIngr => [...currIngr, name])
@@ -108,8 +103,7 @@ export const CocktailBrewer = () => {
    setCocktailDescription(cocktailDescription)
  }
 
- const unselectIngredient = async (event) => {
-   const name = event.target.id
+ const unselectIngredient = async (name) => {
    setIngredient('')
 
    setCommonIngredients(await getAdditionalIngredients(name, 'unselect'))
@@ -129,14 +123,14 @@ export const CocktailBrewer = () => {
           <div id='selected_ingredients'>
           {selectedIngredients.map(selected_ingr => {
               return (
-                <Label
+                <Button
                   key={selected_ingr}
                   id={selected_ingr}
-                  onClick={unselectIngredient}
+                  size='tiny'
+                  onClick={() => {unselectIngredient(selected_ingr)}}
                 >
-                  {capitalize(selected_ingr)}
-                  <Icon name='cocktail' />
-                </Label>
+                {capitalize(selected_ingr)}
+              </Button>
               )
             })}
           </div>
@@ -158,7 +152,7 @@ export const CocktailBrewer = () => {
                 key={common_ingr}
                 id={common_ingr}
                 size='tiny'
-                onClick={selectIngredient}
+                onClick={() => {selectIngredient(common_ingr)}}
               >
                 {capitalize(common_ingr)}
               </Button>
@@ -173,7 +167,6 @@ export const CocktailBrewer = () => {
 
  const CocktailCard = () => {
   if (cocktailDescription.hasOwnProperty('name')){
-    console.log(cocktailDescription)
     return (
       <Segment style={{ backgroundColor: '#eb2f06' }}>
         <Header block as='h1'>Cocktails</Header>
@@ -188,8 +181,8 @@ export const CocktailBrewer = () => {
               <List>
                 {cocktailDescription.ingredients.map(ingredient => {
                   return (
-                    <List.Item>
-                      <List.Header>{capitalize(ingredient[0])}</List.Header>
+                    <List.Item key={ingredient[0]} style={{color: ingredient[2]}}>
+                      <Header>{capitalize(ingredient[0])}</Header>
                       {ingredient[1]}
                     </List.Item>
                   )
@@ -227,6 +220,7 @@ export const CocktailBrewer = () => {
             <Header as='h3' icon textAlign='center' style={{ color: 'white' }}>Start making cocktail now !</Header>
 
             <Input
+              autoFocus
               icon='search'
               iconPosition='left'
               placeholder='Search for ingredient'

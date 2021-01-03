@@ -12,6 +12,9 @@ urlpatterns = [
     ),
     path("cocktail/validate", views.validate_cocktail, name="cocktail-validate"),
     path("cocktail/refuse", views.refuse_cocktail, name="cocktail-validate"),
+
+    path("cocktail/tags", views.cocktail_tags, name="cocktail-tags"),
+
     path("ingredients", views.ingredients_filter, name="ingredients-get"),
     path(
         "ingredients/suggestion",

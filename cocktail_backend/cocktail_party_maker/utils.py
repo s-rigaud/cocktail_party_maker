@@ -9,7 +9,7 @@ def add_full_cocktail(
     name: str,
     picture: str,
     instructions: str,
-    ingredients: List[Tuple[str, str]],
+    ingredients: List[Tuple[str, str, str]],
     tags: list,
     creator=None,
 ) -> Tuple[bool, str]:
@@ -23,7 +23,7 @@ def add_full_cocktail(
         or not ingredients
         or not isinstance(ingredients, list)
         or not len(ingredients) >= 2
-        or not len(set([ingr for ingr, _ in ingredients if ingr])) >= 2
+        or not len(set([ingr for ingr, *_ in ingredients if ingr])) >= 2
         or not isinstance(tags, list)
     ):
         return (
@@ -31,7 +31,10 @@ def add_full_cocktail(
             "Your cocktail should not already known and have at least 2 different ingredients",
         )
 
+    # TODO check if everything is valid before saving anything
+
     # Filter empty fields sended via frontend
+    # TODO check this
     for ingredient in list(ingredients):
         quantity = ingredient[1].strip()
         if " " in quantity and not quantity.split(" ")[0]:
@@ -50,7 +53,7 @@ def add_full_cocktail(
     )
     cocktail.save()  # To retrieve ID
 
-    for ingredient_name, quantity in ingredients:
+    for ingredient_name, quantity, color in ingredients:
         if ingredient_name:
             ingredient_name = ingredient_name.lower().strip()
             ingredients = Ingredient.objects.filter(name=ingredient_name)
@@ -60,7 +63,7 @@ def add_full_cocktail(
             else:
                 # All ingredients already exists normally
                 print(f"Added the new ingredient {ingredient_name}")
-                ingredient = Ingredient(name=ingredient_name)
+                ingredient = Ingredient(name=ingredient_name, color=color)
                 ingredient.save()  # Save for ID
 
             if quantity:

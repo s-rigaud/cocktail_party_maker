@@ -1,8 +1,8 @@
 import React, {useState} from 'react'
 
-import { Button, Icon } from 'semantic-ui-react'
+import { Button, Icon, Label } from 'semantic-ui-react'
 
-export const Header = ({username, setTab, isStaff}) => {
+export const Header = ({username, setTab, isStaff, notifications}) => {
 
   const [loading, setLoading] = useState(false)
 
@@ -16,6 +16,13 @@ export const Header = ({username, setTab, isStaff}) => {
     setTab('Profile')
   }
 
+  const NotificationBubble = () =>{
+    if(notifications.length) {
+      return <Label circular color="red" size="mini">{notifications.length}</Label>
+    }
+    return <div></div>
+  }
+
   const LoginButton = () => {
     if (username !== ''){
       return (
@@ -24,6 +31,7 @@ export const Header = ({username, setTab, isStaff}) => {
         >
           <Icon name='user' />
           {username}
+          <NotificationBubble />
         </Button>
       )
     }
@@ -54,6 +62,12 @@ export const Header = ({username, setTab, isStaff}) => {
                 <h5 style={{ color: 'white', margin:'5px'}}>🍹 Cocktail Party Maker</h5>
             </div>
             <LoginButton />
+            <Button
+              onClick={() => setTab("Leaderboard")}
+            >
+              <Icon name='user' />
+              Lead
+            </Button>
             <CocktailDBButton />
         </div>
     </header>

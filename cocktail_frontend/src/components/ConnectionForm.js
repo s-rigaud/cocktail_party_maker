@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 
 import { Button, Form, Message, Divider, Segment, Accordion } from 'semantic-ui-react'
 
-export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
+export const ConnectionForm = ({setUsername, setIsStaff, setTab, setNotifications}) => {
 
     const [success, setSuccess] = useState(false)
     const [failure, setFailure] = useState(false)
@@ -19,7 +19,7 @@ export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
         setPassword('')
     }
 
-    const loginRequest = async() => {
+    const requestLogUser = async() => {
         let login_infos = {
             'login': login,
             'password': password,
@@ -33,20 +33,23 @@ export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
           body: JSON.stringify(login_infos)
         })
 
-        let responseContent = await response.json()
         resetRequestStatus()
         clearFormFields()
 
         if (response.ok) {
+            let responseContent = await response.json()
+            console.log(responseContent)
             setUsername(responseContent.user.login)
             setIsStaff(responseContent.user.is_staff)
+            setNotifications(responseContent.notifications)
             setTab('Brew')
         }else{
             setUsername('')
+            setFailure(true)
         }
       }
 
-    const registerRequest = async() => {
+    const requestRegisterUser = async() => {
         let sign_up_infos = {
             'login': login,
             'mail': mail,
@@ -81,6 +84,7 @@ export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
         return 1
     }
 
+    //View is swap to login after sign up succesfull
     const LoginForm = (
         <Form>
             <Message
@@ -89,6 +93,13 @@ export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
                 header='Success ✔️'
                 content={'Your account have been created. You can log right now !'}
                 visible={success}
+            />
+            <Message
+                error
+                icon='times'
+                header='Error'
+                content={'Unknow user or wrong password.'}
+                visible={failure}
             />
             <Form.Input
                 autoFocus
@@ -121,7 +132,7 @@ export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
                 }}
             />
 
-            <Button content='Login' primary onClick={loginRequest}/>
+            <Button content='Login' primary onClick={requestLogUser}/>
             <Divider hidden/>
             <Button content='Sign up' icon='signup' size='big' onClick={() => {setIsLoggingSelected(false)}}/>
         </Form>
@@ -184,7 +195,7 @@ export const ConnectionForm = ({setUsername, setIsStaff, setTab}) => {
                 }}
             />
 
-            <Button content='Sign up' icon='signup' primary onClick={registerRequest}/>
+            <Button content='Sign up' icon='signup' primary onClick={requestRegisterUser}/>
         </Form>
     )
 

@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 
-import { Card, Label, Image, List, Divider, Button, Header, Grid } from 'semantic-ui-react'
+import { Card, Label, Image, List, Divider, Button, Header, Grid, Segment, Icon } from 'semantic-ui-react'
 
 export const CocktailValidation = () => {
 
@@ -14,7 +14,6 @@ export const CocktailValidation = () => {
   const getCocktailToValidate = async() => {
     const response = await fetch('cocktail/tovalidate')
     const responseContent = await response.json()
-    console.log(responseContent)
     setCocktail(responseContent.cocktail)
     setCocktailCount(responseContent.count)
   }
@@ -28,16 +27,21 @@ export const CocktailValidation = () => {
 
   const NothingContent = () => {
       return (
-        <h1>Sorry we foud no cocktail to review</h1>
+        <Segment placeholder color="green">
+          <Header icon>
+            <Icon name='trophy' />
+            The administration team have done a great job, there is no new cocktails to review ✔️
+        </Header>
+      </Segment>
       )
   }
 
-  const validateCocktailRequest = async() => {
+  const requestValidateCocktaill = async() => {
     await fetch('cocktail/validate?id=' + cocktail.id, {method: 'POST'})
     await getCocktailToValidate()
   }
 
-  const refuseCocktailRequest = async() => {
+  const requestRefuseCocktaill = async() => {
     await fetch('cocktail/refuse?id=' + cocktail.id, {method: 'POST'})
     await getCocktailToValidate()
   }
@@ -58,7 +62,7 @@ export const CocktailValidation = () => {
                               {cocktail.ingredients.map(ingredient => {
                               return (
                                   <List.Item>
-                                    <List.Header>{capitalize(ingredient[0])}</List.Header>
+                                    <List.Header color={ingredient[2]}>{capitalize(ingredient[0])}</List.Header>
                                     {capitalize(ingredient[1])}
                                   </List.Item>
                               )
@@ -83,7 +87,7 @@ export const CocktailValidation = () => {
                           color='green'
                           icon='check'
                           floated='left'
-                          onClick={validateCocktailRequest}
+                          onClick={requestValidateCocktaill}
                         />
                       </Grid.Column>
                       <Grid.Column>
@@ -92,7 +96,7 @@ export const CocktailValidation = () => {
                           color='red'
                           icon='times'
                           floated='right'
-                          onClick={refuseCocktailRequest}
+                          onClick={requestRefuseCocktaill}
                         />
                       </Grid.Column>
                     </Grid.Row>

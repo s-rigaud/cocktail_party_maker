@@ -7,13 +7,12 @@ export const Leaderboard = () => {
   const [users, setUsers] = useState([])
 
   useEffect(() => {
-    leaderboardRequest()
+    requestGetLeaderboard()
   }, [])
 
-  const leaderboardRequest = async() => {
+  const requestGetLeaderboard = async() => {
     const response = await fetch('user/leaderboard')
     let responseContent = await response.json()
-    console.log(responseContent)
     setUsers(responseContent.users)
   }
 

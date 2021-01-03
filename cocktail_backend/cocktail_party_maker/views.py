@@ -6,8 +6,10 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+from users.models import Notification
+
 from .data_gatherer import collect_cocktails_cdb
-from .models import Cocktail, Ingredient, Quantity
+from .models import Cocktail, Ingredient, Quantity, Tag
 from .utils import add_full_cocktail
 from .views import *
 
@@ -21,10 +23,12 @@ def add_cocktail(request):
     {
         "name": "cocktail name",
         "ingredients": [
-            ("ingr1", "quantity1"),
-            ("ingr2", "quantity2"),
-            ....
-        ]
+            ("ingr1", "quantity1", "color1"),
+            ("ingr2", "quantity2", "color2"),
+        ],
+        "picture": "??",
+        "instructions", "Put xxxx..",
+        "tags": ["Summer", "Chrismass", ...]
     }
     """
     cocktail_data = json.loads(request.body.decode())
@@ -39,15 +43,15 @@ def add_cocktail(request):
     if not success:
         return JsonResponse(
             data={"message": message},
-            status=418,
+            status=400,
         )
     else:
         return JsonResponse(
             {
                 "name": cocktail_data.get("name", ""),
                 "ingredients": [
-                    (ingredient, quantity)
-                    for ingredient, quantity in cocktail_data.get("ingredients", [])
+                    (ingredient, *_)
+                    for ingredient, *_ in cocktail_data.get("ingredients", [])
                     if ingredient
                 ],
                 "message": message,
@@ -77,9 +81,9 @@ def get_exact_cocktail(request):
     cocktail_response = {}
     for cocktail in cocktails:
         quantities = cocktail.quantity_set.all().select_related("ingredient")
-        ingredients = [(q.ingredient.name, q.quantity) for q in quantities]
+        ingredients = [(q.ingredient.name, q.quantity, q.ingredient.color) for q in quantities]
 
-        if ingredient_filter == set(name for name, _ in ingredients):
+        if ingredient_filter == set(name for name, *_ in ingredients):
             # Add one usage if the cocktail is made
             cocktail.usage += 1
             cocktail.save()
@@ -171,7 +175,7 @@ def get_cocktail_to_validate(request):
             if cocktail.creator:
                 creator_name = cocktail.creator.username
             quantities = cocktail.quantity_set.all().select_related("ingredient")
-            ingredients = [(q.ingredient.name, q.quantity) for q in quantities]
+            ingredients = [(q.ingredient.name, q.quantity, q.ingredient.color) for q in quantities]
             cocktail_tags = cocktail.cocktailtag_set.all().select_related("tag")
             tags = [ct.tag.name for ct in cocktail_tags]
 
@@ -215,6 +219,13 @@ def validate_cocktail(request):
         if creator:
             creator.points += 1
             creator.save()
+
+            notif = Notification(
+                message="Congratulation your cocktail has been approved",
+                user=creator,
+            )
+            notif.save()
+
         return JsonResponse({"status": "Done"})
     else:
         return JsonResponse(
@@ -268,3 +279,8 @@ def load_cocktail_db_info(request):
             },
             status=403,
         )
+
+def cocktail_tags(request):
+    """Return all existing tags"""
+    tags = Tag.objects.only("name").all()
+    return JsonResponse(data={"tags": [t.name for t in tags]})

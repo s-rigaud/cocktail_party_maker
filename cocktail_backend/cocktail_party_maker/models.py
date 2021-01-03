@@ -18,7 +18,7 @@ class Cocktail(models.Model):
     state = models.CharField(
         max_length=2,
         default="PD",
-        choices=(STATES),
+        choices=STATES,
     )
     creator = models.ForeignKey(to=Profile, on_delete=models.SET_NULL, null=True)
 
@@ -42,9 +42,21 @@ class Cocktail(models.Model):
 
 class Ingredient(models.Model):
     """"""
+    # Frontend requirements :/
+    AVAILABLE_COLORS = (
+        (color.capitalize(), color)
+        for color in [
+            "red", "orange", "yellow", "olive", "green", "teal",
+            "blue", "violet", "purple", "pink", "brown", "grey", "black"
+        ]
+    )
 
     name = models.CharField(max_length=50, unique=True)
-    color = models.CharField(max_length=7, default="#777777")  #  hex color
+    color = models.CharField(
+        max_length=7,
+        default="grey",
+        choices=AVAILABLE_COLORS,
+    )
 
     def __repr__(self):
         return f"Ingredient: {self.id} - {self.name}"
@@ -65,6 +77,11 @@ class Tag(models.Model):
 
     def __repr__(self):
         return f"Tag: {self.id} - {self.name}"
+
+    def to_api_format(self):
+        return {
+            "name": self.name
+        }
 
 
 class CocktailTag(models.Model):

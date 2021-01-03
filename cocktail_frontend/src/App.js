@@ -16,18 +16,20 @@ function App() {
   const [username, setUsername] = useState("")
   const [isStaff, setIsStaff] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [notifications, setNotifications] = useState([])
 
   useEffect(() => {
-    getLoggedUserRequest()
+    requestUserInfo()
   }, [])
 
-  const getLoggedUserRequest = async() => {
+  const requestUserInfo = async() => {
     const response = await fetch("user/logged")
     if (response.ok){
       let responseContent = await response.json()
-      console.log(responseContent)
       setUsername(responseContent.user.login)
       setIsStaff(responseContent.user.is_staff)
+      setNotifications(responseContent.notifications)
+      console.log(notifications)
     }
   }
 
@@ -45,7 +47,6 @@ function App() {
         tabNameMapping.push("Administrate")
       }
     }
-    console.log("Set index to ", tabNameMapping.indexOf(tabName))
     return tabNameMapping.indexOf(tabName)
   }
 
@@ -56,14 +57,14 @@ function App() {
         {
           menuItem: '🥃 Brew cocktail',
           render: () =>
-            <Tab.Pane attached="left">
+            <Tab.Pane>
               <CocktailBrewer />
             </Tab.Pane>,
         },
         {
           menuItem: "🏆 Leaderboard",
           render: () =>
-            <Tab.Pane attached="left">
+            <Tab.Pane>
               <Leaderboard />
             </Tab.Pane>,
         }
@@ -74,11 +75,12 @@ function App() {
           {
             menuItem: "👤 Log in",
             render: () =>
-              <Tab.Pane attached="left">
+              <Tab.Pane>
                 <ConnectionForm
                   setUsername={setUsername}
                   setIsStaff={setIsStaff}
                   setTab={setTab}
+                  setNotifications={setNotifications}
                 />
               </Tab.Pane>,
           },
@@ -88,18 +90,20 @@ function App() {
           {
             menuItem: "➕ Add cocktail",
             render: () =>
-              <Tab.Pane attached="left">
+              <Tab.Pane>
                 <CocktailMakerForm />
               </Tab.Pane>,
           },
           {
             menuItem: "👤 Profile Page",
             render: () =>
-              <Tab.Pane attached="left">
+              <Tab.Pane>
                 <ProfilePage
                   username={username}
                   setUsername={setUsername}
                   setTab={setTab}
+                  notifications={notifications}
+                  setNotifications={setNotifications}
                 />
               </Tab.Pane>,
           },
@@ -110,7 +114,7 @@ function App() {
             {
               menuItem: "👨‍🍳 Administrate cocktails",
               render: () =>
-                <Tab.Pane attached="left">
+                <Tab.Pane>
                   <CocktailValidation />
                 </Tab.Pane>,
             },
@@ -126,14 +130,13 @@ function App() {
         username={username}
         setTab={setTab}
         isStaff={isStaff}
+        notifications={notifications}
       />
       <Tab
         menu={{
-          color: "#458585",
           secondary: true,
-          vertical: true,
-          pointing: true,
           attached: 'top',
+          pointing: true,
           fluid: true,
         }}
         activeIndex={activeIndex}
