@@ -120,11 +120,11 @@ export const CocktailMakerForm = () => {
           body: JSON.stringify(cocktail)
         })
         const responseContent = await response.json()
-
+        console.log(responseContent);
         if (response.ok) {
             setSuccess(true)
             clearFormFields()
-            setResponseMessage(responseContent)
+            setResponseMessage(responseContent.message)
         }else{
             setFailure(true)
             setResponseMessage(responseContent.message)
@@ -202,7 +202,7 @@ export const CocktailMakerForm = () => {
                 icon='cocktail'
                 header='Success ✔️'
                 list={formatIngredientsToDisplay()}
-                content={'📝 Recipe of ' + responseMessage.name + ' learnt.'}
+                content={'📝 Recipe of ' + responseMessage + ' learnt.'}
                 visible={success}
             />
             <Message

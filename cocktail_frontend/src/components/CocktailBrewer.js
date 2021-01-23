@@ -1,20 +1,20 @@
 import React, {useEffect, useState} from 'react'
 
-import { Card, Icon, Image, List, Divider, Label, Header, Input, Button, Segment } from 'semantic-ui-react'
+import { Card, Icon, Image, List, Divider, Header, Input, Button, Segment } from 'semantic-ui-react'
 
 export const CocktailBrewer = () => {
  const [ingredient, setIngredient] = useState('') // Search ingredient
 
- const [commonIngredients, setCommonIngredients] = useState([])
- const [selectedIngredients, setSelectedIngredients] = useState([])
- const [cocktailDescription, setCocktailDescription] = useState({})
+ const [commonIngredients, setCommonIngredients] = useState([]) // List of object
+ const [selectedIngredients, setSelectedIngredients] = useState([]) // List of object
+ const [cocktailDescription, setCocktailDescription] = useState({}) // Cocktail properties
 
  useEffect(() => {
    populateCommonIngredients()
  }, [])
 
  useEffect(() => {
-   updateCommonIngredients()
+   //updateCommonIngredients()
  }, [ingredient])
 
  const updateCommonIngredients = async() => {
@@ -31,7 +31,7 @@ export const CocktailBrewer = () => {
    return string
  }
 
- const getRandomCocktail = async() =>{
+ const requestRandomCocktail = async() =>{
   const response = await fetch('/cocktail/random')
   const cocktail = await response.json()
   return cocktail
@@ -40,8 +40,7 @@ export const CocktailBrewer = () => {
    // As setCommonIngredients asn't updated the list yet we have to
    // pass the new selected ingredients as parameter
 
-   // Slice to work with a copy of prop value
-   let updatedSelectedItems = selectedIngredients.slice()
+   let updatedSelectedItems = selectedIngredients.map(ingr_object => ingr_object.name)
    if (mode === 'select') {
      updatedSelectedItems.push(newlyMovedIngr)
    }else{
@@ -49,9 +48,13 @@ export const CocktailBrewer = () => {
    }
 
    let url = '/ingredients/suggestion'
-   if (updatedSelectedItems.length > 0) {
-     url += '?ingredients=' + JSON.stringify(updatedSelectedItems)
-   }
+   for (let ingr of updatedSelectedItems) {
+    if (updatedSelectedItems.indexOf(ingr) === 0){
+     url += '?ingredients=' + ingr
+    }else{
+     url += '&ingredients=' + ingr
+    }
+  }
 
    const response = await fetch(url)
    const ingredient_json = await response.json()
@@ -70,18 +73,22 @@ export const CocktailBrewer = () => {
 
  const getExactCocktailByIngredients = async(newlyMovedIngr, mode) => {
    // As setCommonIngredients asn't updated the list yet we have to
-   // pass the new selected ingredients as parameter
+   // pass the new selected or unselected ingredients as parameter
 
-   // Concat to work with a copy of prop value
-   let updatedSelectedItems = selectedIngredients.slice()
+   let updatedSelectedItems = selectedIngredients.map(ingr_object => ingr_object.name)
    if (mode === 'select') {
      updatedSelectedItems.push(newlyMovedIngr)
    }else{
      updatedSelectedItems = updatedSelectedItems.filter(item => item !== newlyMovedIngr)
    }
+
    let url = '/cocktail/exact'
-   if (updatedSelectedItems.length > 0) {
-    url += '?ingredients=' + JSON.stringify(updatedSelectedItems)
+   for (let ingr of updatedSelectedItems) {
+     if (updatedSelectedItems.indexOf(ingr) === 0){
+      url += '?ingredients=' + ingr
+     }else{
+      url += '&ingredients=' + ingr
+     }
    }
    const response = await fetch(url)
    const ingredient_json = await response.json()
@@ -90,13 +97,16 @@ export const CocktailBrewer = () => {
 
  const populateCommonIngredients = async() => {
    const ingredients = await getApiIngredientsByName('')
-   setCommonIngredients(ingredients.map(ingr => ingr.name))
+   console.log(ingredients)
+   setCommonIngredients(ingredients)
  }
 
  const selectIngredient = async(name) => {
    setIngredient('')
+   //Need to retrieve object to pass color
+   let ingr_object = commonIngredients.filter(ingr => ingr.name === name)[0]
 
-   setSelectedIngredients(currIngr => [...currIngr, name])
+   setSelectedIngredients(currIngrs => [...currIngrs, ingr_object])
    setCommonIngredients(await getAdditionalIngredients(name, 'select'))
 
    const cocktailDescription = await getExactCocktailByIngredients(name, 'select')
@@ -108,7 +118,7 @@ export const CocktailBrewer = () => {
 
    setCommonIngredients(await getAdditionalIngredients(name, 'unselect'))
    setSelectedIngredients(currIngr => currIngr.filter(
-     ingr => ingr !== name
+     ingr => ingr.name !== name
    ))
 
    const cocktailDescription = await getExactCocktailByIngredients(name, 'unselect')
@@ -124,12 +134,13 @@ export const CocktailBrewer = () => {
           {selectedIngredients.map(selected_ingr => {
               return (
                 <Button
-                  key={selected_ingr}
-                  id={selected_ingr}
+                  key={selected_ingr.name}
+                  id={selected_ingr.name}
+                  color={selected_ingr.color}
                   size='tiny'
-                  onClick={() => {unselectIngredient(selected_ingr)}}
+                  onClick={() => {unselectIngredient(selected_ingr.name)}}
                 >
-                {capitalize(selected_ingr)}
+                {capitalize(selected_ingr.name)}
               </Button>
               )
             })}
@@ -149,12 +160,13 @@ export const CocktailBrewer = () => {
           {commonIngredients.map(common_ingr => {
             return (
               <Button
-                key={common_ingr}
-                id={common_ingr}
+                key={common_ingr.name}
+                id={common_ingr.name}
+                color={common_ingr.color}
                 size='tiny'
-                onClick={() => {selectIngredient(common_ingr)}}
+                onClick={() => {selectIngredient(common_ingr.name)}}
               >
-                {capitalize(common_ingr)}
+                {capitalize(common_ingr.name)}
               </Button>
             )
           })}
@@ -208,7 +220,7 @@ export const CocktailBrewer = () => {
 
  return (
    <div className='App'>
-     <Button icon='random' onClick={getRandomCocktail}></Button>
+     <Button icon='random' onClick={requestRandomCocktail}></Button>
      <Segment.Group piled>
 
         <Segment style={{ backgroundColor: '#343A40' }}>

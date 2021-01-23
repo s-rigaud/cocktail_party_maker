@@ -39,7 +39,7 @@ export const Header = ({username, setTab, isStaff, notifications}) => {
   }
 
   const CocktailDBButton = () => {
-    if (isStaff){
+    if (username !== '' && isStaff){
       return (
         <Button
             disabled={loading}
@@ -63,10 +63,10 @@ export const Header = ({username, setTab, isStaff, notifications}) => {
             </div>
             <LoginButton />
             <Button
-              onClick={() => setTab("Leaderboard")}
+              onClick={() => setTab("Log")}
             >
               <Icon name='user' />
-              Lead
+              Login
             </Button>
             <CocktailDBButton />
         </div>

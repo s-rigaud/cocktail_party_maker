@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import ipdb
 
 from users.models import Notification
 
@@ -66,17 +67,15 @@ def get_exact_cocktail(request):
     """
     params = request.GET
 
-    ingredient = params.get("ingredient")
-    ingredient_filter = set(json.loads(params.get("ingredients", "[]")))
-    if ingredient:
-        ingredient_filter.add(ingredient)
-    ingredient_filter.discard("")
+    # Dict to copy result and retrieve multiple values
+    request_ingredients = dict(params).get("ingredients", [])
+    ingredient_filter = set(request_ingredients)
 
-    # cocktails = transform_cocktails(cocktail_list)
     cocktails = Cocktail.objects.filter(
         state="AC",
         quantity__ingredient__name__in=ingredient_filter,
-    )  # and to add .filter(author = log_user and Pending)
+    )
+    # and to add .filter(author = log_user and Pending) TODO see is own cocktail
 
     cocktail_response = {}
     for cocktail in cocktails:
@@ -112,9 +111,9 @@ def ingredients_filter(request):
     if params.get("name"):
         filters["name__icontains"] = params["name"]
 
-    ingredients = Ingredient.objects.filter(**filters).only("name").order_by("name")
+    ingredients = Ingredient.objects.filter(**filters).only("name", "color").order_by("name")
 
-    return JsonResponse({"ingredients": [ingr for ingr in ingredients.values("name")]})
+    return JsonResponse({"ingredients": [{"name": ingr.name, "color": ingr.color} for ingr in ingredients]})
 
 
 def ingredient_suggestion(request):
@@ -123,12 +122,15 @@ def ingredient_suggestion(request):
     """
     params = request.GET
 
-    ingredient = params.get("ingredient")
-    ingredient_filter = set(json.loads(params.get("ingredients", "[]")))
-    if ingredient:
-        ingredient_filter.add(ingredient)
-    ingredient_filter.discard("")
-    ingredient_filter = [i.lower() for i in ingredient_filter]
+    # Dict to copy result and retrieve multiple values
+    request_ingredients = dict(params).get("ingredients", [])
+    ingredient_filter = set(request_ingredients)
+
+    # Return all ingredient if no filters
+    # TODO -> should return only ingredients in cocktail recipes instead
+    if not ingredient_filter:
+        ingredients = Ingredient.objects.all().only("name").order_by("name")
+        return JsonResponse({"ingredients": [{"name": i.name, "color": i.color} for i in ingredients]})
 
     # Getting the intersection of all cocktail with one of the ingredient
     # in its composition so the result is cocktails with at least all
@@ -154,9 +156,10 @@ def ingredient_suggestion(request):
                     "color": quantity.ingredient.color,
                 }
             )
+    ingredients = sorted(ingredients, key=lambda x: x["name"])
 
     # While frontend can't access dict list
-    return JsonResponse({"ingredients": [i["name"] for i in ingredients]})
+    return JsonResponse({"ingredients": [{"name": i["name"], "color": i["color"]} for i in ingredients]})
 
 
 @login_required
@@ -226,7 +229,7 @@ def validate_cocktail(request):
             )
             notif.save()
 
-        return JsonResponse({"status": "Done"})
+        return JsonResponse({"status": "done"})
     else:
         return JsonResponse(
             {
@@ -246,7 +249,7 @@ def refuse_cocktail(request):
         cocktail = Cocktail.objects.only("state").get(id=cocktail_id)
         cocktail.state = "RF"
         cocktail.save()
-        return JsonResponse({"status": "Done"})
+        return JsonResponse({"status": "done"})
     else:
         return JsonResponse(
             {
@@ -270,7 +273,7 @@ def get_random_cocktail(request):
 def load_cocktail_db_info(request):
     if request.user.is_staff:
         collect_cocktails_cdb()
-        return JsonResponse({"status": "Done"})
+        return JsonResponse({"status": "success"})
     else:
         return JsonResponse(
             {

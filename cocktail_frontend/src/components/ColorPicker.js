@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 
-import { Button, Segment, Label } from 'semantic-ui-react'
+import { Button, Segment } from 'semantic-ui-react'
 
 export const ColorPicker = ({colors, onChange}) => {
     const [color, setColor] = useState("grey")
